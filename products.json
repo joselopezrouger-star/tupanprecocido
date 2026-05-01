@@ -1,0 +1,154 @@
+{
+  "business": {
+    "name": "TUPAN Precocido",
+    "whatsapp": "541158098137",
+    "instagram": "tupanprecocido",
+    "location": "Bella Vista, Buenos Aires",
+    "about": "Somos una panadería familiar con años de experiencia en la elaboración de panes precocidos de la más alta calidad. Nuestros productos están hechos con ingredientes seleccionados para que vos los termines de hornear en casa y los disfrutes como recién salidos del horno.",
+    "about2": "Trabajamos con pasión y dedicación para llevar el mejor pan a tu mesa. Cada producto es elaborado con amor y los mejores ingredientes."
+  },
+  "zones": [
+    {
+      "id": "zona1",
+      "name": "Zona 1",
+      "description": "Bella Vista y alrededores",
+      "shipping": {
+        "cost": 0,
+        "freeThreshold": 16000,
+        "message": "Envío gratis en pedidos mayores a $16.000"
+      }
+    },
+    {
+      "id": "zona2",
+      "name": "Zona 2",
+      "description": "Otras zonas",
+      "shipping": {
+        "cost": 4000,
+        "freeThreshold": 20000,
+        "message": "Envío gratis en pedidos mayores a $20.000. Pedidos menores tienen costo de envío $4.000"
+      }
+    }
+  ],
+  "products": [
+    {
+      "id": "flauton-2kg",
+      "name": "Flauton x 2kg",
+      "description": "Pan francés clásico",
+      "image": "",
+      "prices": {
+        "zona1": 8200,
+        "zona2": 10000
+      }
+    },
+    {
+      "id": "flauton-5kg",
+      "name": "Flauton x 5kg",
+      "description": "Pan francés clásico, tamaño grande",
+      "image": "",
+      "prices": {
+        "zona1": 18000,
+        "zona2": 21000
+      }
+    },
+    {
+      "id": "salvado-2kg",
+      "name": "Pan de Salvado x 2kg",
+      "description": "Pan integral con salvado",
+      "image": "",
+      "prices": {
+        "zona1": 8200,
+        "zona2": 10000
+      }
+    },
+    {
+      "id": "criollos-2kg",
+      "name": "Criollos x 2kg",
+      "description": "Pan tradicional criollo",
+      "image": "",
+      "prices": {
+        "zona1": 8200,
+        "zona2": 10000
+      }
+    },
+    {
+      "id": "campo-2kg",
+      "name": "Pan de Campo x 2kg",
+      "description": "Pan rústico de campo",
+      "image": "",
+      "prices": {
+        "zona1": 8200,
+        "zona2": 10000
+      }
+    },
+    {
+      "id": "mix-4kg",
+      "name": "MIX x 4kg",
+      "description": "Variedad de panes surtidos",
+      "image": "",
+      "prices": {
+        "zona1": 17000,
+        "zona2": 20000
+      }
+    },
+    {
+      "id": "mignon-2kg",
+      "name": "Mignon x 2kg",
+      "description": "Pancitos pequeños",
+      "image": "",
+      "prices": {
+        "zona1": 8200,
+        "zona2": 10000
+      }
+    },
+    {
+      "id": "zeppelin",
+      "name": "Zeppelin Integral x unidad",
+      "description": "Pan integral individual",
+      "image": "",
+      "prices": {
+        "zona1": 3600,
+        "zona2": 4300
+      }
+    },
+    {
+      "id": "minibaguette",
+      "name": "Mini Baguette x 3 unidades",
+      "description": "Baguettes pequeñas, pack de 3",
+      "image": "",
+      "prices": {
+        "zona1": 3300,
+        "zona2": 3800
+      }
+    },
+    {
+      "id": "lactal-blanco",
+      "name": "Pan Lactal Blanco",
+      "description": "Pan de molde blanco clásico",
+      "image": "",
+      "prices": {
+        "zona1": 3800,
+        "zona2": 4500
+      }
+    },
+    {
+      "id": "lactal-integral",
+      "name": "Pan Lactal Integral con Semillas",
+      "description": "Pan de molde integral con semillas",
+      "image": "",
+      "prices": {
+        "zona1": 3800,
+        "zona2": 4500
+      }
+    },
+    {
+      "id": "lactal-salvado",
+      "name": "Pan Lactal Salvado",
+      "description": "Pan de molde con salvado",
+      "image": "",
+      "prices": {
+        "zona1": 3800,
+        "zona2": 4500
+      }
+    }
+  ]
+}
