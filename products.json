@@ -38,6 +38,10 @@
       "prices": {
         "zona1": 8200,
         "zona2": 10000
+      },
+      "promoPrice": {
+        "zona1": 6500,
+        "zona2": 8000
       }
     },
     {

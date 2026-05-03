@@ -7,32 +7,55 @@ async function init() {
     const res = await fetch('products.json');
     data = await res.json();
   } catch (e) {
-    document.getElementById('products-grid').innerHTML =
-      '<p style="color:red;padding:20px">Error al cargar los productos. Recargá la página.</p>';
+    console.error('Error cargando productos:', e);
     return;
   }
 
-  renderZoneOverlay();
+  renderLanding();
+  renderZoneButtons();
   bindEvents();
 }
 
-function bindEvents() {
-  document.querySelectorAll('.zone-btn').forEach(btn => {
-    btn.addEventListener('click', () => selectZone(btn.dataset.zone));
-  });
+// ══════════════════════════════
+// LANDING
+// ══════════════════════════════
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.section));
-  });
+function renderLanding() {
+  const b = data.business;
 
-  document.getElementById('cart-btn').addEventListener('click', openCart);
-  document.getElementById('close-cart-btn').addEventListener('click', closeCart);
-  document.getElementById('cart-overlay-bg').addEventListener('click', closeCart);
-  document.getElementById('change-zone-btn').addEventListener('click', showZoneOverlay);
-  document.getElementById('whatsapp-btn').addEventListener('click', sendWhatsApp);
+  document.getElementById('hero-location').textContent = b.location;
+  document.getElementById('landing-about-p1').textContent = b.about;
+  document.getElementById('landing-about-p2').textContent = b.about2;
+  document.getElementById('footer-text').textContent = `© ${new Date().getFullYear()} ${b.name} · Todos los derechos reservados`;
+
+  document.getElementById('hero-instagram').href = `https://instagram.com/${b.instagram}`;
+  document.getElementById('hero-whatsapp').href = `https://wa.me/${b.whatsapp}`;
+
+  document.getElementById('landing-contact-list').innerHTML = `
+    <div class="contact-item">
+      <span class="contact-icon">📍</span>
+      <span>${b.location}</span>
+    </div>
+    <a href="https://wa.me/${b.whatsapp}" class="contact-item" target="_blank" rel="noopener">
+      <span class="contact-icon">💬</span>
+      <span>+${b.whatsapp}</span>
+    </a>
+    <a href="https://instagram.com/${b.instagram}" class="contact-item" target="_blank" rel="noopener">
+      <span class="contact-icon">📸</span>
+      <span>@${b.instagram}</span>
+    </a>
+  `;
 }
 
-function renderZoneOverlay() {
+function scrollToAbout() {
+  document.getElementById('landing-about').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ══════════════════════════════
+// ZONE SELECTION
+// ══════════════════════════════
+
+function renderZoneButtons() {
   const container = document.getElementById('zone-buttons');
   container.innerHTML = data.zones.map(zone => `
     <button class="zone-btn" data-zone="${zone.id}">
@@ -52,22 +75,39 @@ function renderZoneOverlay() {
 function selectZone(zoneId) {
   selectedZone = data.zones.find(z => z.id === zoneId);
   cart = {};
+
   document.getElementById('zone-overlay').classList.add('hidden');
+  document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+
   renderProducts();
   renderZoneBanner();
-  updateCartBtn();
   renderAbout();
+  updateCartBtn();
+  switchTab('products');
 }
 
 function showZoneOverlay() {
   document.getElementById('zone-overlay').classList.remove('hidden');
-  document.getElementById('app').classList.add('hidden');
 }
+
+function goToLanding() {
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('zone-overlay').classList.add('hidden');
+  document.getElementById('landing').classList.remove('hidden');
+  cart = {};
+  selectedZone = null;
+  updateCartBtn();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ══════════════════════════════
+// PRODUCTS
+// ══════════════════════════════
 
 function renderZoneBanner() {
   document.getElementById('zone-banner').textContent =
-    `📍 ${selectedZone.name} — ${selectedZone.description}  •  ${selectedZone.shipping.message}`;
+    `📍 ${selectedZone.name} — ${selectedZone.description}  ·  ${selectedZone.shipping.message}`;
 }
 
 function renderProducts() {
@@ -75,29 +115,40 @@ function renderProducts() {
   grid.innerHTML = data.products.map(product => {
     const price = product.prices[selectedZone.id];
     if (price === undefined) return '';
-    return productCardHTML(product, price);
+    const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
+    return productCardHTML(product, price, salePrice);
   }).join('');
 }
 
-function productCardHTML(product, price) {
+function productCardHTML(product, price, salePrice) {
   const qty = cart[product.id] || 0;
   const imgContent = product.image
     ? `<img src="${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='🍞'">`
     : '🍞';
 
+  const hasPromo = salePrice != null && salePrice < price;
+  const displayPrice = hasPromo ? salePrice : price;
+
+  const priceHTML = hasPromo
+    ? `<div class="product-price-promo">
+         <span class="price-original">${fmt(price)}</span>
+         <span class="price-sale">${fmt(salePrice)}</span>
+       </div>`
+    : `<div class="product-price">${fmt(price)}</div>`;
+
   return `
-    <div class="product-card" id="card-${product.id}">
+    <div class="product-card" id="card-${product.id}" data-price="${displayPrice}">
+      ${hasPromo ? '<span class="promo-badge">PROMO</span>' : ''}
       <div class="product-img">${imgContent}</div>
       <div class="product-info">
         <div class="product-name">${product.name}</div>
         ${product.description ? `<div class="product-desc">${product.description}</div>` : ''}
-        <div class="product-price">${fmt(price)}</div>
+        ${priceHTML}
         <div class="product-actions" id="actions-${product.id}">
           ${actionsHTML(product.id, qty)}
         </div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 function actionsHTML(productId, qty) {
@@ -109,9 +160,12 @@ function actionsHTML(productId, qty) {
       <button class="qty-btn" onclick="changeQty('${productId}', -1)">−</button>
       <span class="qty-display">${qty}</span>
       <button class="qty-btn" onclick="changeQty('${productId}', 1)">+</button>
-    </div>
-  `;
+    </div>`;
 }
+
+// ══════════════════════════════
+// CART
+// ══════════════════════════════
 
 function addToCart(productId) {
   cart[productId] = 1;
@@ -139,6 +193,12 @@ function updateCartBtn() {
   const badge = document.getElementById('cart-count');
   badge.textContent = total;
   badge.style.display = total > 0 ? 'inline-flex' : 'none';
+}
+
+function getEffectivePrice(product) {
+  const base = product.prices[selectedZone.id];
+  const sale = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
+  return (sale != null && sale < base) ? sale : base;
 }
 
 function openCart() {
@@ -177,7 +237,7 @@ function renderCartItems() {
   whatsappBtn.disabled = false;
 
   itemsEl.innerHTML = cartItems.map(({ product, qty }) => {
-    const price = product.prices[selectedZone.id];
+    const price = getEffectivePrice(product);
     return `
       <div class="cart-item">
         <div class="cart-item-name">${product.name}</div>
@@ -190,14 +250,23 @@ function renderCartItems() {
       </div>`;
   }).join('');
 
-  const subtotal = cartItems.reduce((s, { product, qty }) =>
-    s + product.prices[selectedZone.id] * qty, 0);
+  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
   const shipping = subtotal >= freeThreshold ? 0 : shippingCost;
   const total = subtotal + shipping;
+  const missing = freeThreshold - subtotal;
+
+  // Shipping notice: how far until free shipping (only if not already free and there's a cost)
+  let noticeHTML = '';
+  if (shippingCost > 0 && shipping > 0 && missing > 0) {
+    noticeHTML = `<div class="shipping-notice">
+      🚚 Agregá ${fmt(missing)} más para obtener envío gratis
+    </div>`;
+  }
 
   summaryEl.innerHTML = `
+    ${noticeHTML}
     <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
     <div class="summary-row">
       <span>Envío</span>
@@ -211,19 +280,14 @@ function sendWhatsApp() {
     .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
     .filter(item => item.product);
 
-  const subtotal = cartItems.reduce((s, { product, qty }) =>
-    s + product.prices[selectedZone.id] * qty, 0);
-  const freeThreshold = selectedZone.shipping.freeThreshold;
-  const shippingCost = selectedZone.shipping.cost;
-  const shipping = subtotal >= freeThreshold ? 0 : shippingCost;
+  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
+  const shipping = subtotal >= selectedZone.shipping.freeThreshold ? 0 : selectedZone.shipping.cost;
   const total = subtotal + shipping;
 
   const lines = cartItems.map(({ product, qty }) => {
-    const price = product.prices[selectedZone.id];
+    const price = getEffectivePrice(product);
     return `• ${product.name} x${qty}: ${fmt(price * qty)}`;
   }).join('\n');
-
-  const shippingLine = shipping === 0 ? 'Gratis 🎉' : fmt(shipping);
 
   const msg = [
     `¡Hola! Quiero hacer un pedido 😊`,
@@ -231,24 +295,18 @@ function sendWhatsApp() {
     lines,
     ``,
     `Subtotal: ${fmt(subtotal)}`,
-    `Envío: ${shippingLine}`,
+    `Envío: ${shipping === 0 ? 'Gratis 🎉' : fmt(shipping)}`,
     `*Total: ${fmt(total)}*`,
     ``,
-    `Zona: ${selectedZone.name}`
+    `Zona: ${selectedZone.name} — ${selectedZone.description}`
   ].join('\n');
 
-  window.open(
-    `https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(msg)}`,
-    '_blank'
-  );
+  window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-function switchTab(section) {
-  document.querySelectorAll('.tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.section === section));
-  document.getElementById('products-section').classList.toggle('hidden', section !== 'products');
-  document.getElementById('about-section').classList.toggle('hidden', section !== 'about');
-}
+// ══════════════════════════════
+// ABOUT (in-app tab)
+// ══════════════════════════════
 
 function renderAbout() {
   const b = data.business;
@@ -261,8 +319,44 @@ function renderAbout() {
   document.getElementById('about-instagram-text').textContent = `@${b.instagram}`;
 }
 
+// ══════════════════════════════
+// TABS
+// ══════════════════════════════
+
+function switchTab(section) {
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.section === section));
+  document.getElementById('products-section').classList.toggle('hidden', section !== 'products');
+  document.getElementById('about-section').classList.toggle('hidden', section !== 'about');
+}
+
+// ══════════════════════════════
+// EVENTS
+// ══════════════════════════════
+
+function bindEvents() {
+  document.getElementById('hero-order-btn').addEventListener('click', showZoneOverlay);
+  document.getElementById('overlay-back-btn').addEventListener('click', () => {
+    document.getElementById('zone-overlay').classList.add('hidden');
+  });
+  document.getElementById('back-to-landing-btn').addEventListener('click', goToLanding);
+  document.getElementById('change-zone-btn').addEventListener('click', showZoneOverlay);
+  document.getElementById('cart-btn').addEventListener('click', openCart);
+  document.getElementById('close-cart-btn').addEventListener('click', closeCart);
+  document.getElementById('cart-overlay-bg').addEventListener('click', closeCart);
+  document.getElementById('whatsapp-btn').addEventListener('click', sendWhatsApp);
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.section));
+  });
+}
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+
 function fmt(n) {
-  return '$' + n.toLocaleString('es-AR');
+  return '$' + Math.round(n).toLocaleString('es-AR');
 }
 
 document.addEventListener('DOMContentLoaded', init);
