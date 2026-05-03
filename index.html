@@ -194,6 +194,35 @@
           <div class="transfer-row"><span>Banco</span><span id="bank-banco"></span></div>
         </div>
       </div>
+      <div class="client-section" id="client-section" style="display:none">
+        <p class="payment-label">¿Ya pediste antes?</p>
+        <div class="payment-options">
+          <button class="payment-btn selected" id="btn-habitual" onclick="selectClientType('habitual')">Cliente habitual</button>
+          <button class="payment-btn" id="btn-nuevo" onclick="selectClientType('nuevo')">Es mi primer pedido</button>
+        </div>
+        <div class="new-client-form hidden" id="new-client-form">
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input class="form-input" id="field-nombre" type="text" placeholder="Tu nombre">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Apellido</label>
+            <input class="form-input" id="field-apellido" type="text" placeholder="Tu apellido">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dirección</label>
+            <input class="form-input" id="field-direccion" type="text" placeholder="Calle y número">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Barrio y Lote</label>
+            <input class="form-input" id="field-barrio" type="text" placeholder="Barrio / Lote">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Entre calles</label>
+            <input class="form-input" id="field-entrecalles" type="text" placeholder="Entre ... y ...">
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Fixed bottom: summary + WhatsApp always visible -->

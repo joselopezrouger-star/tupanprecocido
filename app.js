@@ -2,6 +2,7 @@ let data = null;
 let selectedZone = null;
 let cart = {};
 let paymentMethod = null;
+let clientType = 'habitual';
 
 async function init() {
   try {
@@ -77,6 +78,7 @@ function selectZone(zoneId) {
   selectedZone = data.zones.find(z => z.id === zoneId);
   cart = {};
   paymentMethod = null;
+  clientType = 'habitual';
 
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.add('hidden');
@@ -98,6 +100,7 @@ function goToLanding() {
   cart = {};
   selectedZone = null;
   paymentMethod = null;
+  clientType = 'habitual';
   updateCartBtn();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -108,7 +111,7 @@ function goToLanding() {
 
 function renderZoneBanner() {
   document.getElementById('zone-banner').textContent =
-    `🚚 ${selectedZone.shipping.message}`;
+    `${selectedZone.name}  ·  ${selectedZone.shipping.message}`;
 }
 
 function renderProducts() {
@@ -312,25 +315,41 @@ function sendWhatsApp() {
 
   const lines = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
-    return `• ${product.name} x${qty}: ${fmt(price * qty)}`;
+    return `— [ ${qty} ] ${product.name} > ${fmtMsg(price * qty)}`;
   }).join('\n');
 
   const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
 
-  const msg = [
-    `¡Hola! Quiero hacer un pedido 😊`,
+  const parts = [
+    `Hola! Quiero hacer un pedido:`,
     ``,
     lines,
     ``,
-    `Subtotal: ${fmt(subtotal)}`,
-    `Envío: ${shipping === 0 ? 'Gratis 🎉' : fmt(shipping)}`,
-    `*Total: ${fmt(total)}*`,
+    `Subtotal: ${fmtMsg(subtotal)}`,
+    `Envio: ${shipping === 0 ? 'Gratis' : fmtMsg(shipping)}`,
+    `Total: ${fmtMsg(total)}`,
     ``,
     `Medio de pago: ${pagoLabel}`,
-    `Zona: ${selectedZone.name}`
-  ].join('\n');
+    `Zona: ${selectedZone.name}`,
+  ];
 
-  window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+  if (clientType === 'nuevo') {
+    const nombre      = document.getElementById('field-nombre').value.trim();
+    const apellido    = document.getElementById('field-apellido').value.trim();
+    const direccion   = document.getElementById('field-direccion').value.trim();
+    const barrio      = document.getElementById('field-barrio').value.trim();
+    const entrecalles = document.getElementById('field-entrecalles').value.trim();
+    parts.push(
+      ``,
+      `--- Datos del cliente ---`,
+      `Nombre: ${nombre} ${apellido}`,
+      `Direccion: ${direccion}`,
+      `Barrio/Lote: ${barrio}`,
+      `Entre calles: ${entrecalles}`
+    );
+  }
+
+  window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`, '_blank');
 }
 
 // ══════════════════════════════
@@ -358,7 +377,15 @@ function selectPayment(method) {
   } else {
     details.classList.add('hidden');
   }
+  document.getElementById('client-section').style.display = 'block';
   document.getElementById('whatsapp-btn').disabled = false;
+}
+
+function selectClientType(type) {
+  clientType = type;
+  document.getElementById('btn-habitual').classList.toggle('selected', type === 'habitual');
+  document.getElementById('btn-nuevo').classList.toggle('selected', type === 'nuevo');
+  document.getElementById('new-client-form').classList.toggle('hidden', type !== 'nuevo');
 }
 
 // ══════════════════════════════
@@ -385,6 +412,10 @@ function bindEvents() {
 
 function fmt(n) {
   return '$' + Math.round(n).toLocaleString('es-AR');
+}
+
+function fmtMsg(n) {
+  return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 document.addEventListener('DOMContentLoaded', init);
