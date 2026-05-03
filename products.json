@@ -33,7 +33,7 @@
       "shipping": {
         "cost": 4000,
         "freeThreshold": 20000,
-        "message": "Envío gratis superando $20.000 · Menos de $20.000: $4.000 de envío"
+        "message": "Envío gratis a partir de $20.000"
       }
     }
   ],

@@ -64,10 +64,7 @@ function renderZoneButtons() {
   container.innerHTML = data.zones.map(zone => `
     <button class="zone-btn" data-zone="${zone.id}">
       <span class="zone-icon">📍</span>
-      <span class="zone-text">
-        <span class="zone-name">${zone.name}</span>
-        <span class="zone-desc">${zone.description}</span>
-      </span>
+      <span class="zone-name">${zone.name}</span>
     </button>
   `).join('');
 
@@ -111,7 +108,7 @@ function goToLanding() {
 
 function renderZoneBanner() {
   document.getElementById('zone-banner').textContent =
-    `📍 ${selectedZone.name} — ${selectedZone.description}  ·  ${selectedZone.shipping.message}`;
+    `🚚 ${selectedZone.shipping.message}`;
 }
 
 function renderProducts() {
