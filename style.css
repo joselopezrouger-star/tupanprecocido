@@ -1015,11 +1015,12 @@ main {
   padding: 10px 12px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text);
   background: var(--bg);
   outline: none;
   transition: border-color 0.2s;
+  width: 100%;
 }
 
 .form-input:focus { border-color: var(--primary); }

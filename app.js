@@ -315,7 +315,7 @@ function sendWhatsApp() {
 
   const lines = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
-    return `— [ ${qty} ] ${product.name} > ${fmtMsg(price * qty)}`;
+    return `— [ ${qty} ] ${product.name} > ${fmt(price * qty)}`;
   }).join('\n');
 
   const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
@@ -325,9 +325,9 @@ function sendWhatsApp() {
     ``,
     lines,
     ``,
-    `Subtotal: ${fmtMsg(subtotal)}`,
-    `Envio: ${shipping === 0 ? 'Gratis' : fmtMsg(shipping)}`,
-    `Total: ${fmtMsg(total)}`,
+    `Subtotal: ${fmt(subtotal)}`,
+    `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
+    `*Total: ${fmt(total)}*`,
     ``,
     `Medio de pago: ${pagoLabel}`,
     `Zona: ${selectedZone.name}`,
@@ -379,6 +379,9 @@ function selectPayment(method) {
   }
   document.getElementById('client-section').style.display = 'block';
   document.getElementById('whatsapp-btn').disabled = false;
+  setTimeout(() => {
+    document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 80);
 }
 
 function selectClientType(type) {
