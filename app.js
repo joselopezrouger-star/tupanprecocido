@@ -380,7 +380,10 @@ function selectPayment(method) {
   document.getElementById('client-section').style.display = 'block';
   document.getElementById('whatsapp-btn').disabled = false;
   setTimeout(() => {
-    document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const scrollTarget = method === 'transferencia'
+      ? document.getElementById('transfer-details')
+      : document.getElementById('client-section');
+    scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 80);
 }
 
