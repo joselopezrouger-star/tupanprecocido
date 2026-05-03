@@ -135,6 +135,100 @@ body {
 
 .hero-wave svg { width: 100%; height: 100%; display: block; }
 
+/* ── How it works ── */
+.how-it-works {
+  background: white;
+  padding: 56px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.how-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+.section-sub {
+  color: var(--text-light);
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+
+.steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.step {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 24px 20px;
+  flex: 1;
+  min-width: 150px;
+  max-width: 200px;
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.step-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.step-num {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 800;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step h3 {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.step p {
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.step-arrow {
+  color: var(--primary-light);
+  font-size: 24px;
+  font-weight: 700;
+  align-self: center;
+  flex-shrink: 0;
+  padding-top: 8px;
+}
+
+@media (max-width: 540px) {
+  .step-arrow { display: none; }
+  .step { min-width: 130px; }
+}
+
 /* Landing About */
 .landing-about {
   background: var(--bg);
@@ -454,6 +548,8 @@ main {
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card:hover {
@@ -466,7 +562,7 @@ main {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: var(--red);
+  background: linear-gradient(135deg, #43A047, #2E7D32);
   color: white;
   font-size: 11px;
   font-weight: 800;
@@ -474,7 +570,7 @@ main {
   border-radius: 20px;
   z-index: 1;
   letter-spacing: 0.3px;
-  box-shadow: 0 2px 6px rgba(229,57,53,0.4);
+  box-shadow: 0 2px 6px rgba(46,125,50,0.4);
 }
 
 .product-img {
@@ -490,7 +586,12 @@ main {
 
 .product-img img { width: 100%; height: 100%; object-fit: cover; }
 
-.product-info { padding: 12px; }
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
 
 .product-name {
   font-size: 14px;
@@ -505,6 +606,7 @@ main {
   color: var(--text-light);
   margin-bottom: 8px;
   line-height: 1.4;
+  flex: 1;
 }
 
 /* Price — normal */
@@ -534,7 +636,7 @@ main {
 .price-sale {
   font-size: 17px;
   font-weight: 800;
-  color: var(--red);
+  color: #2E7D32;
 }
 
 .add-btn {
