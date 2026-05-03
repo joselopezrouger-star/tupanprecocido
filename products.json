@@ -17,23 +17,23 @@
   },
   "zones": [
     {
-      "id": "zona1",
+      "id": "bellavista",
       "name": "Bella Vista",
       "description": "Bella Vista y alrededores",
       "shipping": {
         "cost": 0,
         "freeThreshold": 16000,
-        "message": "Envío gratis en pedidos mayores a $16.000"
+        "message": "Envío gratis a partir de $16.000"
       }
     },
     {
-      "id": "zona2",
+      "id": "cabazonanorte",
       "name": "CABA y Zona Norte",
       "description": "CABA, Zona Norte y alrededores",
       "shipping": {
         "cost": 4000,
         "freeThreshold": 20000,
-        "message": "Envío gratis en pedidos mayores a $20.000. Pedidos menores tienen costo de envío $4.000"
+        "message": "Envío gratis superando $20.000 · Menos de $20.000: $4.000 de envío"
       }
     }
   ],
@@ -44,12 +44,12 @@
       "description": "Pan francés clásico",
       "image": "",
       "prices": {
-        "zona1": 8200,
-        "zona2": 10000
+        "bellavista": 8200,
+        "cabazonanorte": 10000
       },
       "promoPrice": {
-        "zona1": 6500,
-        "zona2": 8000
+        "bellavista": 6500,
+        "cabazonanorte": 8000
       }
     },
     {
@@ -58,8 +58,8 @@
       "description": "Pan francés clásico, tamaño grande",
       "image": "",
       "prices": {
-        "zona1": 18000,
-        "zona2": 21000
+        "bellavista": 18000,
+        "cabazonanorte": 21000
       }
     },
     {
@@ -68,8 +68,8 @@
       "description": "Pan integral con salvado",
       "image": "",
       "prices": {
-        "zona1": 8200,
-        "zona2": 10000
+        "bellavista": 8200,
+        "cabazonanorte": 10000
       }
     },
     {
@@ -78,8 +78,8 @@
       "description": "Pan tradicional criollo",
       "image": "",
       "prices": {
-        "zona1": 8200,
-        "zona2": 10000
+        "bellavista": 8200,
+        "cabazonanorte": 10000
       }
     },
     {
@@ -88,8 +88,8 @@
       "description": "Pan rústico de campo",
       "image": "",
       "prices": {
-        "zona1": 8200,
-        "zona2": 10000
+        "bellavista": 8200,
+        "cabazonanorte": 10000
       }
     },
     {
@@ -98,8 +98,8 @@
       "description": "Variedad de panes surtidos",
       "image": "",
       "prices": {
-        "zona1": 17000,
-        "zona2": 20000
+        "bellavista": 17000,
+        "cabazonanorte": 20000
       }
     },
     {
@@ -108,8 +108,8 @@
       "description": "Pancitos pequeños",
       "image": "",
       "prices": {
-        "zona1": 8200,
-        "zona2": 10000
+        "bellavista": 8200,
+        "cabazonanorte": 10000
       }
     },
     {
@@ -118,8 +118,8 @@
       "description": "Pan integral individual",
       "image": "",
       "prices": {
-        "zona1": 3600,
-        "zona2": 4300
+        "bellavista": 3600,
+        "cabazonanorte": 4300
       }
     },
     {
@@ -128,8 +128,8 @@
       "description": "Baguettes pequeñas, pack de 3",
       "image": "",
       "prices": {
-        "zona1": 3300,
-        "zona2": 3800
+        "bellavista": 3300,
+        "cabazonanorte": 3800
       }
     },
     {
@@ -138,8 +138,8 @@
       "description": "Pan de molde blanco clásico",
       "image": "",
       "prices": {
-        "zona1": 3800,
-        "zona2": 4500
+        "bellavista": 3800,
+        "cabazonanorte": 4500
       }
     },
     {
@@ -148,8 +148,8 @@
       "description": "Pan de molde integral con semillas",
       "image": "",
       "prices": {
-        "zona1": 3800,
-        "zona2": 4500
+        "bellavista": 3800,
+        "cabazonanorte": 4500
       }
     },
     {
@@ -158,8 +158,8 @@
       "description": "Pan de molde con salvado",
       "image": "",
       "prices": {
-        "zona1": 3800,
-        "zona2": 4500
+        "bellavista": 3800,
+        "cabazonanorte": 4500
       }
     }
   ]

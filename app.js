@@ -24,7 +24,6 @@ async function init() {
 function renderLanding() {
   const b = data.business;
 
-  document.getElementById('hero-location').textContent = b.location;
   document.getElementById('landing-about-p1').textContent = b.about;
   document.getElementById('landing-about-p2').textContent = b.about2;
   document.getElementById('footer-text').textContent = `© ${new Date().getFullYear()} ${b.name} · Todos los derechos reservados`;
@@ -46,6 +45,10 @@ function renderLanding() {
       <span>@${b.instagram}</span>
     </a>
   `;
+}
+
+function scrollToHow() {
+  document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' });
 }
 
 function scrollToAbout() {
