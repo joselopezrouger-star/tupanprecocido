@@ -141,11 +141,15 @@ function productCardHTML(product, price, salePrice) {
       ${hasPromo ? '<span class="promo-badge">PROMO</span>' : ''}
       <div class="product-img">${imgContent}</div>
       <div class="product-info">
-        <div class="product-name">${product.name}</div>
-        ${product.description ? `<div class="product-desc">${product.description}</div>` : ''}
-        ${priceHTML}
-        <div class="product-actions" id="actions-${product.id}">
-          ${actionsHTML(product.id, qty)}
+        <div class="product-top">
+          <div class="product-name">${product.name}</div>
+          ${product.description ? `<div class="product-desc">${product.description}</div>` : ''}
+        </div>
+        <div class="product-footer">
+          ${priceHTML}
+          <div class="product-actions" id="actions-${product.id}">
+            ${actionsHTML(product.id, qty)}
+          </div>
         </div>
       </div>
     </div>`;
@@ -189,10 +193,27 @@ function refreshActions(productId) {
 }
 
 function updateCartBtn() {
-  const total = Object.values(cart).reduce((s, q) => s + q, 0);
+  const totalItems = Object.values(cart).reduce((s, q) => s + q, 0);
   const badge = document.getElementById('cart-count');
-  badge.textContent = total;
-  badge.style.display = total > 0 ? 'inline-flex' : 'none';
+  badge.textContent = totalItems;
+  badge.style.display = totalItems > 0 ? 'inline-flex' : 'none';
+  updateFloatingCart(totalItems);
+}
+
+function updateFloatingCart(totalItems) {
+  const bar = document.getElementById('floating-cart');
+  if (!bar) return;
+  if (totalItems === 0) {
+    bar.classList.add('hidden');
+    return;
+  }
+  const cartItems = Object.keys(cart)
+    .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
+    .filter(i => i.product);
+  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
+  document.getElementById('floating-cart-label').textContent =
+    `Ver pedido · ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} · ${fmt(subtotal)}`;
+  bar.classList.remove('hidden');
 }
 
 function getEffectivePrice(product) {
@@ -205,6 +226,7 @@ function openCart() {
   renderCartItems();
   document.getElementById('cart-panel').classList.add('open');
   document.getElementById('cart-overlay-bg').classList.add('open');
+  document.getElementById('floating-cart')?.classList.add('hidden');
   document.body.style.overflow = 'hidden';
 }
 
@@ -212,6 +234,7 @@ function closeCart() {
   document.getElementById('cart-panel').classList.remove('open');
   document.getElementById('cart-overlay-bg').classList.remove('open');
   document.body.style.overflow = '';
+  updateCartBtn();
 }
 
 function renderCartItems() {

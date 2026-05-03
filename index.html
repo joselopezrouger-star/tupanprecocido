@@ -48,35 +48,40 @@
 
     <section class="how-it-works">
       <div class="how-inner">
-        <h2 class="section-title">Así de fácil</h2>
-        <p class="section-sub">Pan recién horneado en tu casa, cuando vos querés</p>
+        <h2>Así de fácil</h2>
+        <p class="how-sub">Pan recién horneado en tu casa, cuando vos querés</p>
         <div class="steps">
           <div class="step">
             <div class="step-icon">🛒</div>
-            <div class="step-num">1</div>
-            <h3>Hacés tu pedido</h3>
-            <p>Armás tu pedido acá y nos escribís por WhatsApp. Simple y rápido.</p>
+            <div class="step-body">
+              <span class="step-num">1</span>
+              <strong>Hacés tu pedido</strong>
+              <span>Por WhatsApp, rápido y sin complicaciones</span>
+            </div>
           </div>
-          <div class="step-arrow">→</div>
           <div class="step">
             <div class="step-icon">🚚</div>
-            <div class="step-num">2</div>
-            <h3>Te lo llevamos</h3>
-            <p>Coordinamos la entrega y te lo dejamos en la puerta de tu casa.</p>
+            <div class="step-body">
+              <span class="step-num">2</span>
+              <strong>Te lo llevamos</strong>
+              <span>Coordinamos y te lo dejamos en la puerta</span>
+            </div>
           </div>
-          <div class="step-arrow">→</div>
           <div class="step">
             <div class="step-icon">❄️</div>
-            <div class="step-num">3</div>
-            <h3>Lo guardás en el freezer</h3>
-            <p>Dura meses congelado. Siempre tenés pan fresco disponible.</p>
+            <div class="step-body">
+              <span class="step-num">3</span>
+              <strong>Lo guardás en el freezer</strong>
+              <span>Dura meses. Siempre tenés pan disponible</span>
+            </div>
           </div>
-          <div class="step-arrow">→</div>
           <div class="step">
             <div class="step-icon">🔥</div>
-            <div class="step-num">4</div>
-            <h3>Lo calentás al horno</h3>
-            <p>15 minutos al horno y tenés pan recién horneado como de panadería.</p>
+            <div class="step-body">
+              <span class="step-num">4</span>
+              <strong>Lo calentás al horno</strong>
+              <span>15 minutos y está como recién hecho</span>
+            </div>
           </div>
         </div>
       </div>
@@ -182,6 +187,13 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- Floating cart bar -->
+  <div id="floating-cart" class="floating-cart hidden">
+    <button onclick="openCart()">
+      🛒 <span id="floating-cart-label"></span>
+    </button>
   </div>
 
   <!-- ══════════════════════════════
