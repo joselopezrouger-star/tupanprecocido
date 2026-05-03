@@ -201,6 +201,7 @@ function updateCartBtn() {
   const badge = document.getElementById('cart-count');
   badge.textContent = totalItems;
   badge.style.display = totalItems > 0 ? 'inline-flex' : 'none';
+  document.getElementById('cart-btn').classList.toggle('cart-btn--active', totalItems > 0);
   updateFloatingCart(totalItems);
 }
 
@@ -379,12 +380,18 @@ function selectPayment(method) {
   }
   document.getElementById('client-section').style.display = 'block';
   document.getElementById('whatsapp-btn').disabled = false;
-  setTimeout(() => {
-    const scrollTarget = method === 'transferencia'
-      ? document.getElementById('transfer-details')
-      : document.getElementById('client-section');
-    scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 80);
+  if (method === 'transferencia') {
+    setTimeout(() => {
+      document.getElementById('transfer-details').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+    setTimeout(() => {
+      document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 1100);
+  } else {
+    setTimeout(() => {
+      document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
 }
 
 function selectClientType(type) {
@@ -418,7 +425,6 @@ function bindEvents() {
     document.getElementById('zone-overlay').classList.add('hidden');
   });
   document.getElementById('back-to-landing-btn').addEventListener('click', goToLanding);
-  document.getElementById('change-zone-btn').addEventListener('click', showZoneOverlay);
   document.getElementById('cart-btn').addEventListener('click', openCart);
   document.getElementById('close-cart-btn').addEventListener('click', closeCart);
   document.getElementById('cart-overlay-bg').addEventListener('click', closeCart);
