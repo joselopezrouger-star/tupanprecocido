@@ -1,6 +1,7 @@
 let data = null;
 let selectedZone = null;
 let cart = {};
+let paymentMethod = null;
 
 async function init() {
   try {
@@ -75,6 +76,7 @@ function renderZoneButtons() {
 function selectZone(zoneId) {
   selectedZone = data.zones.find(z => z.id === zoneId);
   cart = {};
+  paymentMethod = null;
 
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.add('hidden');
@@ -82,9 +84,7 @@ function selectZone(zoneId) {
 
   renderProducts();
   renderZoneBanner();
-  renderAbout();
   updateCartBtn();
-  switchTab('products');
 }
 
 function showZoneOverlay() {
@@ -97,6 +97,7 @@ function goToLanding() {
   document.getElementById('landing').classList.remove('hidden');
   cart = {};
   selectedZone = null;
+  paymentMethod = null;
   updateCartBtn();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -253,11 +254,13 @@ function renderCartItems() {
         Tu carrito está vacío
       </div>`;
     summaryEl.innerHTML = '';
+    document.getElementById('payment-section').style.display = 'none';
     whatsappBtn.disabled = true;
     return;
   }
 
-  whatsappBtn.disabled = false;
+  document.getElementById('payment-section').style.display = 'block';
+  whatsappBtn.disabled = paymentMethod === null;
 
   itemsEl.innerHTML = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
@@ -312,6 +315,8 @@ function sendWhatsApp() {
     return `• ${product.name} x${qty}: ${fmt(price * qty)}`;
   }).join('\n');
 
+  const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
+
   const msg = [
     `¡Hola! Quiero hacer un pedido 😊`,
     ``,
@@ -321,7 +326,8 @@ function sendWhatsApp() {
     `Envío: ${shipping === 0 ? 'Gratis 🎉' : fmt(shipping)}`,
     `*Total: ${fmt(total)}*`,
     ``,
-    `Zona: ${selectedZone.name} — ${selectedZone.description}`
+    `Medio de pago: ${pagoLabel}`,
+    `Zona: ${selectedZone.name}`
   ].join('\n');
 
   window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -331,26 +337,28 @@ function sendWhatsApp() {
 // ABOUT (in-app tab)
 // ══════════════════════════════
 
-function renderAbout() {
-  const b = data.business;
-  document.getElementById('about-text-1').textContent = b.about;
-  document.getElementById('about-text-2').textContent = b.about2;
-  document.getElementById('about-location').textContent = b.location;
-  document.getElementById('about-whatsapp-link').href = `https://wa.me/${b.whatsapp}`;
-  document.getElementById('about-whatsapp-text').textContent = `+${b.whatsapp}`;
-  document.getElementById('about-instagram-link').href = `https://instagram.com/${b.instagram}`;
-  document.getElementById('about-instagram-text').textContent = `@${b.instagram}`;
+function renderBankDetails() {
+  const bk = data.business.bank;
+  document.getElementById('bank-alias').textContent   = bk.alias;
+  document.getElementById('bank-cbu').textContent     = bk.cbu;
+  document.getElementById('bank-titular').textContent = bk.titular;
+  document.getElementById('bank-cuit').textContent    = bk.cuit;
+  document.getElementById('bank-cuenta').textContent  = bk.cuenta;
+  document.getElementById('bank-banco').textContent   = bk.banco;
 }
 
-// ══════════════════════════════
-// TABS
-// ══════════════════════════════
-
-function switchTab(section) {
-  document.querySelectorAll('.tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.section === section));
-  document.getElementById('products-section').classList.toggle('hidden', section !== 'products');
-  document.getElementById('about-section').classList.toggle('hidden', section !== 'about');
+function selectPayment(method) {
+  paymentMethod = method;
+  document.getElementById('pay-cash').classList.toggle('selected', method === 'efectivo');
+  document.getElementById('pay-transfer').classList.toggle('selected', method === 'transferencia');
+  const details = document.getElementById('transfer-details');
+  if (method === 'transferencia') {
+    details.classList.remove('hidden');
+    renderBankDetails();
+  } else {
+    details.classList.add('hidden');
+  }
+  document.getElementById('whatsapp-btn').disabled = false;
 }
 
 // ══════════════════════════════
@@ -369,9 +377,6 @@ function bindEvents() {
   document.getElementById('cart-overlay-bg').addEventListener('click', closeCart);
   document.getElementById('whatsapp-btn').addEventListener('click', sendWhatsApp);
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.section));
-  });
 }
 
 // ══════════════════════════════

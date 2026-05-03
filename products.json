@@ -5,12 +5,20 @@
     "instagram": "tupanprecocido",
     "location": "Bella Vista, Buenos Aires",
     "about": "Somos una panadería familiar con años de experiencia en la elaboración de panes precocidos de la más alta calidad. Nuestros productos están hechos con ingredientes seleccionados para que vos los termines de hornear en casa y los disfrutes como recién salidos del horno.",
-    "about2": "Trabajamos con pasión y dedicación para llevar el mejor pan a tu mesa. Cada producto es elaborado con amor y los mejores ingredientes."
+    "about2": "Trabajamos con pasión y dedicación para llevar el mejor pan a tu mesa. Cada producto es elaborado con amor y los mejores ingredientes.",
+    "bank": {
+      "alias": "panprecocido",
+      "cbu": "0720221888000038813636",
+      "titular": "Josemaría López Rouger",
+      "cuit": "20-40514237-7",
+      "cuenta": "221-388136/3",
+      "banco": "Santander"
+    }
   },
   "zones": [
     {
       "id": "zona1",
-      "name": "Zona 1",
+      "name": "Bella Vista",
       "description": "Bella Vista y alrededores",
       "shipping": {
         "cost": 0,
@@ -20,8 +28,8 @@
     },
     {
       "id": "zona2",
-      "name": "Zona 2",
-      "description": "Otras zonas",
+      "name": "CABA y Zona Norte",
+      "description": "CABA, Zona Norte y alrededores",
       "shipping": {
         "cost": 4000,
         "freeThreshold": 20000,
