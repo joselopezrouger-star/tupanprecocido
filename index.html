@@ -116,7 +116,6 @@
       <button id="overlay-back-btn" class="overlay-back">← Volver</button>
       <div class="overlay-icon">📍</div>
       <h2>Seleccioná tu zona</h2>
-      <p class="overlay-sub">Seleccioná tu zona para ver los precios</p>
       <div class="zone-buttons" id="zone-buttons"></div>
     </div>
   </div>
@@ -186,7 +185,13 @@
         </div>
         <div class="transfer-details hidden" id="transfer-details">
           <p class="transfer-title">💸 Datos para transferir</p>
-          <div class="transfer-row"><span>Alias</span><span id="bank-alias"></span></div>
+          <div class="transfer-row">
+            <span>Alias</span>
+            <div class="transfer-copy-cell">
+              <span id="bank-alias"></span>
+              <button id="copy-alias-btn" class="copy-btn" onclick="copyAlias()">Copiar</button>
+            </div>
+          </div>
           <div class="transfer-row"><span>CBU</span><span id="bank-cbu"></span></div>
           <div class="transfer-row"><span>Titular</span><span id="bank-titular"></span></div>
           <div class="transfer-row"><span>CUIT</span><span id="bank-cuit"></span></div>

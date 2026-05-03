@@ -262,9 +262,6 @@ function renderCartItems() {
     return;
   }
 
-  document.getElementById('payment-section').style.display = 'block';
-  whatsappBtn.disabled = paymentMethod === null;
-
   itemsEl.innerHTML = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
     return `
@@ -282,24 +279,32 @@ function renderCartItems() {
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
-  const shipping = subtotal >= freeThreshold ? 0 : shippingCost;
+  const belowMinimum = shippingCost === 0 && freeThreshold > 0 && subtotal < freeThreshold;
+  const shipping = belowMinimum ? 0 : (subtotal >= freeThreshold ? 0 : shippingCost);
   const total = subtotal + shipping;
   const missing = freeThreshold - subtotal;
 
-  // Shipping notice: how far until free shipping (only if not already free and there's a cost)
   let noticeHTML = '';
-  if (shippingCost > 0 && shipping > 0 && missing > 0) {
+  if (belowMinimum) {
+    noticeHTML = `<div class="shipping-notice shipping-notice--warn">
+      Monto minimo de pedido: ${fmt(freeThreshold)}. Te faltan ${fmt(missing)}.
+    </div>`;
+  } else if (shippingCost > 0 && shipping > 0 && missing > 0) {
     noticeHTML = `<div class="shipping-notice">
-      🚚 Agregá ${fmt(missing)} más para obtener envío gratis
+      Agrega ${fmt(missing)} mas para envio gratis
     </div>`;
   }
+
+  document.getElementById('payment-section').style.display = belowMinimum ? 'none' : 'block';
+  document.getElementById('client-section').style.display = belowMinimum ? 'none' : (paymentMethod ? 'block' : 'none');
+  whatsappBtn.disabled = paymentMethod === null || belowMinimum;
 
   summaryEl.innerHTML = `
     ${noticeHTML}
     <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
     <div class="summary-row">
-      <span>Envío</span>
-      <span>${shipping === 0 ? '¡Gratis! 🎉' : fmt(shipping)}</span>
+      <span>Envio</span>
+      <span>${belowMinimum ? '—' : (shipping === 0 ? 'Gratis' : fmt(shipping))}</span>
     </div>
     <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>`;
 }
@@ -389,6 +394,20 @@ function selectClientType(type) {
   document.getElementById('btn-habitual').classList.toggle('selected', type === 'habitual');
   document.getElementById('btn-nuevo').classList.toggle('selected', type === 'nuevo');
   document.getElementById('new-client-form').classList.toggle('hidden', type !== 'nuevo');
+  if (type === 'nuevo') {
+    setTimeout(() => {
+      document.getElementById('new-client-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
+}
+
+function copyAlias() {
+  const alias = document.getElementById('bank-alias').textContent;
+  navigator.clipboard.writeText(alias).then(() => {
+    const btn = document.getElementById('copy-alias-btn');
+    btn.textContent = 'Copiado!';
+    setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+  });
 }
 
 // ══════════════════════════════
