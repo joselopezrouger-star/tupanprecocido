@@ -21,7 +21,7 @@
       "name": "Bella Vista",
       "description": "Bella Vista y alrededores",
       "shipping": {
-        "cost": 0,
+        "cost": 3000,
         "freeThreshold": 16000,
         "message": "Envío gratis a partir de $16.000"
       }

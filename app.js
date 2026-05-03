@@ -279,32 +279,27 @@ function renderCartItems() {
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
-  const belowMinimum = shippingCost === 0 && freeThreshold > 0 && subtotal < freeThreshold;
-  const shipping = belowMinimum ? 0 : (subtotal >= freeThreshold ? 0 : shippingCost);
+  const shipping = subtotal >= freeThreshold ? 0 : shippingCost;
   const total = subtotal + shipping;
   const missing = freeThreshold - subtotal;
 
   let noticeHTML = '';
-  if (belowMinimum) {
-    noticeHTML = `<div class="shipping-notice shipping-notice--warn">
-      Monto minimo de pedido: ${fmt(freeThreshold)}. Te faltan ${fmt(missing)}.
-    </div>`;
-  } else if (shippingCost > 0 && shipping > 0 && missing > 0) {
+  if (shippingCost > 0 && shipping > 0 && missing > 0) {
     noticeHTML = `<div class="shipping-notice">
       Agrega ${fmt(missing)} mas para envio gratis
     </div>`;
   }
 
-  document.getElementById('payment-section').style.display = belowMinimum ? 'none' : 'block';
-  document.getElementById('client-section').style.display = belowMinimum ? 'none' : (paymentMethod ? 'block' : 'none');
-  whatsappBtn.disabled = paymentMethod === null || belowMinimum;
+  document.getElementById('payment-section').style.display = 'block';
+  document.getElementById('client-section').style.display = paymentMethod ? 'block' : 'none';
+  whatsappBtn.disabled = paymentMethod === null;
 
   summaryEl.innerHTML = `
     ${noticeHTML}
     <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
     <div class="summary-row">
       <span>Envio</span>
-      <span>${belowMinimum ? '—' : (shipping === 0 ? 'Gratis' : fmt(shipping))}</span>
+      <span>${shipping === 0 ? 'Gratis' : fmt(shipping)}</span>
     </div>
     <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>`;
 }
