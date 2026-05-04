@@ -3,6 +3,20 @@ let selectedZone = null;
 let cart = {};
 let paymentMethod = null;
 let clientType = 'habitual';
+let activeDiscount = null;
+let wheelSpinning = false;
+let currentWheelRotation = 0;
+
+const WHEEL_SEGMENTS = [
+  { label: '5%\ndescuento',  type: 'percent',  value: 5,  color: '#F5E6CC', textColor: '#3D2B1F' },
+  { label: 'Envio\ngratis',  type: 'shipping', value: 0,  color: '#C8E6C9', textColor: '#1B5E20' },
+  { label: '10%\ndescuento', type: 'percent',  value: 10, color: '#C17F3D', textColor: '#ffffff' },
+  { label: '20%\ndescuento', type: 'percent',  value: 20, color: '#8B5E2A', textColor: '#ffffff' },
+  { label: '15%\ndescuento', type: 'percent',  value: 15, color: '#F5E6CC', textColor: '#3D2B1F' },
+  { label: 'Envio\ngratis',  type: 'shipping', value: 0,  color: '#A5D6A7', textColor: '#1B5E20' },
+  { label: '10%\ndescuento', type: 'percent',  value: 10, color: '#C17F3D', textColor: '#ffffff' },
+  { label: '20%\ndescuento', type: 'percent',  value: 20, color: '#8B5E2A', textColor: '#ffffff' },
+];
 
 async function init() {
   try {
@@ -16,6 +30,7 @@ async function init() {
   renderLanding();
   renderZoneButtons();
   bindEvents();
+  checkExistingDiscount();
 }
 
 // ══════════════════════════════
@@ -280,14 +295,37 @@ function renderCartItems() {
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
-  const shipping = subtotal >= freeThreshold ? 0 : shippingCost;
-  const total = subtotal + shipping;
-  const missing = freeThreshold - subtotal;
+
+  let discountAmount = 0;
+  let shippingFree = false;
+  if (activeDiscount?.type === 'percent') {
+    discountAmount = Math.round(subtotal * activeDiscount.value / 100);
+  } else if (activeDiscount?.type === 'shipping') {
+    shippingFree = true;
+  }
+
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  const shipping = (shippingFree || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
+  const total = subtotalAfterDiscount + shipping;
+  const missing = freeThreshold - subtotalAfterDiscount;
 
   let noticeHTML = '';
-  if (shippingCost > 0 && shipping > 0 && missing > 0) {
+  if (shippingCost > 0 && shipping > 0 && missing > 0 && !shippingFree) {
     noticeHTML = `<div class="shipping-notice">
       Agrega ${fmt(missing)} mas para envio gratis
+    </div>`;
+  }
+
+  let discountRowHTML = '';
+  if (activeDiscount?.type === 'percent' && discountAmount > 0) {
+    discountRowHTML = `<div class="summary-row discount">
+      <span>Descuento ${activeDiscount.value}% (ruleta)</span>
+      <span>-${fmt(discountAmount)}</span>
+    </div>`;
+  } else if (activeDiscount?.type === 'shipping') {
+    discountRowHTML = `<div class="summary-row discount">
+      <span>Envio gratis (ruleta)</span>
+      <span>Gratis</span>
     </div>`;
   }
 
@@ -298,6 +336,7 @@ function renderCartItems() {
   summaryEl.innerHTML = `
     ${noticeHTML}
     <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+    ${discountRowHTML}
     <div class="summary-row">
       <span>Envio</span>
       <span>${shipping === 0 ? 'Gratis' : fmt(shipping)}</span>
@@ -311,8 +350,17 @@ function sendWhatsApp() {
     .filter(item => item.product);
 
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
-  const shipping = subtotal >= selectedZone.shipping.freeThreshold ? 0 : selectedZone.shipping.cost;
-  const total = subtotal + shipping;
+
+  let discountAmount = 0;
+  let shippingFree = false;
+  if (activeDiscount?.type === 'percent') {
+    discountAmount = Math.round(subtotal * activeDiscount.value / 100);
+  } else if (activeDiscount?.type === 'shipping') {
+    shippingFree = true;
+  }
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  const shipping = (shippingFree || subtotalAfterDiscount >= selectedZone.shipping.freeThreshold) ? 0 : selectedZone.shipping.cost;
+  const total = subtotalAfterDiscount + shipping;
 
   const lines = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
@@ -327,6 +375,12 @@ function sendWhatsApp() {
     lines,
     ``,
     `Subtotal: ${fmt(subtotal)}`,
+    ...(activeDiscount?.type === 'percent' && discountAmount > 0
+      ? [`Descuento (${activeDiscount.label}): -${fmt(discountAmount)}`]
+      : []),
+    ...(activeDiscount?.type === 'shipping'
+      ? [`Descuento: Envio gratis (ruleta)`]
+      : []),
     `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
     `*Total: ${fmt(total)}*`,
     ``,
@@ -416,6 +470,148 @@ function copyAlias() {
 }
 
 // ══════════════════════════════
+// WHEEL
+// ══════════════════════════════
+
+function checkExistingDiscount() {
+  const saved = localStorage.getItem('tupan_discount');
+  if (!saved) return;
+  try {
+    activeDiscount = JSON.parse(saved);
+    updateWheelFloatBtn();
+  } catch(e) {
+    localStorage.removeItem('tupan_discount');
+  }
+}
+
+function updateWheelFloatBtn() {
+  const btn = document.getElementById('wheel-float-btn');
+  if (!btn) return;
+  if (activeDiscount) {
+    btn.classList.add('won');
+    btn.querySelector('.wheel-float-icon').textContent = '✅';
+    btn.querySelector('.wheel-float-label').textContent = activeDiscount.label.replace('\n', ' ');
+  } else {
+    btn.classList.remove('won');
+    btn.querySelector('.wheel-float-icon').textContent = '🎡';
+    btn.querySelector('.wheel-float-label').textContent = 'Descuento';
+  }
+}
+
+function openWheelModal() {
+  document.getElementById('wheel-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  drawWheel();
+
+  if (activeDiscount) {
+    document.getElementById('spin-btn').style.display = 'none';
+    document.getElementById('wheel-result-label').textContent = activeDiscount.label.replace('\n', ' ');
+    document.getElementById('wheel-result').classList.remove('hidden');
+    document.getElementById('wheel-close-buy-btn').classList.remove('hidden');
+  }
+}
+
+function closeWheelModal() {
+  document.getElementById('wheel-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function drawWheel() {
+  const canvas = document.getElementById('wheel-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const radius = 145;
+  const segCount = WHEEL_SEGMENTS.length;
+  const segAngle = (2 * Math.PI) / segCount;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  WHEEL_SEGMENTS.forEach((seg, i) => {
+    const startAngle = i * segAngle - Math.PI / 2;
+    const endAngle   = startAngle + segAngle;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    const midAngle = startAngle + segAngle / 2;
+    ctx.rotate(midAngle);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = seg.textColor;
+    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
+    const lines = seg.label.split('\n');
+    const lineHeight = 15;
+    const textR = radius * 0.75;
+    lines.forEach((line, li) => {
+      const yOffset = (li - (lines.length - 1) / 2) * lineHeight;
+      ctx.fillText(line, textR, yOffset);
+    });
+    ctx.restore();
+  });
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+  ctx.fillStyle = '#8B5E2A';
+  ctx.fill();
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+}
+
+function spinWheel() {
+  if (wheelSpinning) return;
+  wheelSpinning = true;
+
+  const spinBtn = document.getElementById('spin-btn');
+  spinBtn.disabled = true;
+
+  const winIndex = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+  const segDeg = 360 / WHEEL_SEGMENTS.length;
+  const winCenterDeg = winIndex * segDeg + segDeg / 2;
+  const extraSpins = 1800;
+  const targetRotation = currentWheelRotation + extraSpins + (360 - (currentWheelRotation % 360) - winCenterDeg + 360) % 360;
+
+  currentWheelRotation = targetRotation;
+
+  const canvas = document.getElementById('wheel-canvas');
+  canvas.style.transform = `rotate(${targetRotation}deg)`;
+
+  setTimeout(() => {
+    wheelSpinning = false;
+    showWheelResult(winIndex);
+  }, 4100);
+}
+
+function showWheelResult(winIndex) {
+  const seg = WHEEL_SEGMENTS[winIndex];
+
+  activeDiscount = {
+    type:  seg.type,
+    value: seg.value,
+    label: seg.label.replace('\n', ' '),
+  };
+
+  localStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
+
+  document.getElementById('wheel-result-label').textContent = activeDiscount.label;
+  document.getElementById('wheel-result').classList.remove('hidden');
+  document.getElementById('wheel-btn-group').style.display = 'none';
+  document.getElementById('wheel-close-buy-btn').classList.remove('hidden');
+
+  updateWheelFloatBtn();
+}
+
+// ══════════════════════════════
 // EVENTS
 // ══════════════════════════════
 
@@ -429,7 +625,9 @@ function bindEvents() {
   document.getElementById('close-cart-btn').addEventListener('click', closeCart);
   document.getElementById('cart-overlay-bg').addEventListener('click', closeCart);
   document.getElementById('whatsapp-btn').addEventListener('click', sendWhatsApp);
-
+  document.getElementById('wheel-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeWheelModal();
+  });
 }
 
 // ══════════════════════════════
