@@ -109,6 +109,33 @@
   </div>
 
   <!-- ══════════════════════════════
+       WHEEL MODAL
+  ══════════════════════════════ -->
+  <div id="wheel-overlay" class="overlay hidden">
+    <div class="overlay-card wheel-overlay-card">
+      <button class="overlay-back" onclick="closeWheelModal()">✕ Cerrar</button>
+      <div class="overlay-icon">🎡</div>
+      <h2>¡Tu descuento!</h2>
+      <p class="overlay-sub">Girá la ruleta y ganá un descuento exclusivo para tu pedido</p>
+      <div class="wheel-container">
+        <div class="wheel-pointer">▼</div>
+        <canvas id="wheel-canvas" width="300" height="300"></canvas>
+      </div>
+      <div id="wheel-result" class="wheel-result hidden">
+        <span class="wheel-result-icon">🎉</span>
+        <p class="wheel-result-label" id="wheel-result-label"></p>
+        <p class="wheel-result-sub">¡El descuento se aplicó a tu carrito!</p>
+      </div>
+      <div id="wheel-btn-group">
+        <button id="spin-btn" class="spin-btn" onclick="spinWheel()">¡GIRAR LA RULETA!</button>
+      </div>
+      <button id="wheel-close-buy-btn" class="action-btn action-btn--primary hidden" onclick="closeWheelModal()">
+        ¡Cerrar y comprar! 🛒
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
        ZONE SELECTOR OVERLAY
   ══════════════════════════════ -->
   <div id="zone-overlay" class="overlay hidden">
@@ -153,6 +180,12 @@
       </section>
     </main>
   </div>
+
+  <!-- Floating wheel button -->
+  <button id="wheel-float-btn" class="wheel-float-btn" onclick="openWheelModal()" title="¡Girate un descuento!">
+    <span class="wheel-float-icon">🎡</span>
+    <span class="wheel-float-label">Descuento</span>
+  </button>
 
   <!-- Floating cart bar -->
   <div id="floating-cart" class="floating-cart hidden">

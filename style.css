@@ -1075,3 +1075,144 @@ main {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════
+   WHEEL FLOAT BUTTON
+══════════════════════════════ */
+.wheel-float-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 16px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #C17F3D 0%, #8B5E2A 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(139,94,42,0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.wheel-float-btn:hover  { box-shadow: 0 6px 22px rgba(139,94,42,0.55); }
+.wheel-float-btn:active { transform: scale(0.95); }
+
+.wheel-float-icon {
+  font-size: 24px;
+  animation: wobble 2.4s ease-in-out infinite;
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(-10deg); }
+  50%       { transform: rotate(10deg); }
+}
+
+.wheel-float-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+.wheel-float-btn.won {
+  background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
+  box-shadow: 0 4px 18px rgba(46,125,50,0.45);
+}
+
+/* ══════════════════════════════
+   WHEEL MODAL
+══════════════════════════════ */
+.wheel-overlay-card {
+  padding-top: 52px;
+  max-width: 360px;
+}
+
+.wheel-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto 24px;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  color: var(--primary-dark);
+  z-index: 2;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
+
+#wheel-canvas {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+}
+
+/* Result */
+.wheel-result {
+  text-align: center;
+  padding: 16px 12px;
+  background: var(--primary-light);
+  border-radius: var(--radius);
+  border: 2px solid var(--primary);
+  margin-bottom: 20px;
+  animation: resultPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes resultPop {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.wheel-result-icon { font-size: 36px; display: block; margin-bottom: 6px; }
+
+.wheel-result-label {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--primary-dark);
+  margin-bottom: 4px;
+}
+
+.wheel-result-sub {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+/* Spin button */
+.spin-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #C17F3D 0%, #8B5E2A 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 17px;
+  font-weight: 900;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 18px rgba(193,127,61,0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.spin-btn:hover  { box-shadow: 0 6px 22px rgba(193,127,61,0.55); }
+.spin-btn:active { transform: scale(0.97); }
+.spin-btn:disabled {
+  background: #ccc;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Cart discount row */
+.summary-row.discount {
+  color: #2E7D32;
+  font-weight: 700;
+}
