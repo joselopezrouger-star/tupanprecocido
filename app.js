@@ -8,12 +8,12 @@ let wheelSpinning = false;
 let currentWheelRotation = 0;
 
 const WHEEL_SEGMENTS = [
-  { label: '5%\ndescuento',            type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F' },
-  { label: '10%\ndescuento',           type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff' },
-  { label: 'Lactal Integral\ngratis',  type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'lactal-integral' },
-  { label: '20%\ndescuento',           type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F' },
-  { label: '15%\ndescuento',           type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff' },
-  { label: 'Flauton 2kg\ngratis',      type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'flauton-2kg' },
+  { wheelLabel: '5%\noff',         label: '5% de descuento',              type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F' },
+  { wheelLabel: '10%\noff',        label: '10% de descuento',             type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff' },
+  { wheelLabel: 'Lactal\ngratis',  label: 'Pan Lactal Integral gratis',   type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'lactal-integral' },
+  { wheelLabel: '20%\noff',        label: '20% de descuento',             type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F' },
+  { wheelLabel: '15%\noff',        label: '15% de descuento',             type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff' },
+  { wheelLabel: 'Flauton\n2kg',    label: 'Flauton 2kg gratis',           type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'flauton-2kg' },
 ];
 
 async function init() {
@@ -501,7 +501,7 @@ function updateWheelFloatBtn() {
   if (activeDiscount) {
     btn.classList.add('won');
     btn.querySelector('.wheel-float-icon').textContent = '✅';
-    btn.querySelector('.wheel-float-label').textContent = activeDiscount.label.replace('\n', ' ');
+    btn.querySelector('.wheel-float-label').textContent = activeDiscount.label;
   } else {
     btn.classList.remove('won');
     btn.querySelector('.wheel-float-icon').textContent = '🎡';
@@ -516,7 +516,7 @@ function openWheelModal() {
 
   if (activeDiscount) {
     document.getElementById('spin-btn').style.display = 'none';
-    document.getElementById('wheel-result-label').textContent = activeDiscount.label.replace('\n', ' ');
+    document.getElementById('wheel-result-label').textContent = activeDiscount.label;
     document.getElementById('wheel-result').classList.remove('hidden');
     document.getElementById('wheel-close-buy-btn').classList.remove('hidden');
   }
@@ -557,12 +557,12 @@ function drawWheel() {
     ctx.translate(cx, cy);
     const midAngle = startAngle + segAngle / 2;
     ctx.rotate(midAngle);
-    ctx.textAlign = 'right';
+    ctx.textAlign = 'center';
     ctx.fillStyle = seg.textColor;
-    ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
-    const lines = seg.label.split('\n');
-    const lineHeight = 15;
-    const textR = radius * 0.75;
+    ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, sans-serif';
+    const lines = (seg.wheelLabel || seg.label).split('\n');
+    const lineHeight = 14;
+    const textR = radius * 0.62;
     lines.forEach((line, li) => {
       const yOffset = (li - (lines.length - 1) / 2) * lineHeight;
       ctx.fillText(line, textR, yOffset);
@@ -609,7 +609,7 @@ function showWheelResult(winIndex) {
   activeDiscount = {
     type:      seg.type,
     value:     seg.value,
-    label:     seg.label.replace('\n', ' '),
+    label:     seg.label,
     productId: seg.productId || null,
   };
 
