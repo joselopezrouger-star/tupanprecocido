@@ -45,6 +45,9 @@
           <button class="action-btn action-btn--secondary" onclick="scrollToAbout()">
             🥖 <span>Quiénes somos</span>
           </button>
+          <button id="hero-wheel-btn" class="action-btn action-btn--secondary" onclick="openWheelModal()">
+            🎡 <span>Girar la ruleta</span>
+          </button>
           <a id="hero-instagram" class="action-btn action-btn--secondary" target="_blank" rel="noopener">
             📸 <span>Instagram</span>
           </a>
@@ -81,7 +84,7 @@
             <div class="step-body">
               <span class="step-num">2</span>
               <strong>Te lo llevamos</strong>
-              <span>Coordinamos y te lo llevamos hasta la puerta de tu casa</span>
+              <span>Coordinamos y te lo llevamos hasta la puerta de tu casa.</span>
             </div>
           </div>
           <div class="step">
@@ -199,12 +202,6 @@
     </main>
   </div>
 
-  <!-- Floating wheel button -->
-  <button id="wheel-float-btn" class="wheel-float-btn" onclick="openWheelModal()" title="¡Girate un descuento!">
-    <span class="wheel-float-icon">🎡</span>
-    <span class="wheel-float-label">Descuento</span>
-  </button>
-
   <!-- Floating cart bar -->
   <div id="floating-cart" class="floating-cart hidden">
     <button onclick="openCart()">
@@ -235,18 +232,35 @@
         </div>
         <div class="transfer-details hidden" id="transfer-details">
           <p class="transfer-title">💸 Datos para transferir</p>
-          <div class="transfer-row">
-            <span>Alias</span>
-            <div class="transfer-copy-cell">
-              <span id="bank-alias"></span>
-              <button id="copy-alias-btn" class="copy-btn" onclick="copyAlias()">Copiar</button>
+          <div class="transfer-grid">
+            <div class="transfer-cell">
+              <span class="transfer-label">Alias</span>
+              <div class="transfer-copy-cell">
+                <span id="bank-alias"></span>
+                <button id="copy-alias-btn" class="copy-btn" onclick="copyAlias()">Copiar</button>
+              </div>
+            </div>
+            <div class="transfer-cell">
+              <span class="transfer-label">CBU</span>
+              <span id="bank-cbu" class="transfer-value"></span>
+            </div>
+            <div class="transfer-cell">
+              <span class="transfer-label">Titular</span>
+              <span id="bank-titular" class="transfer-value"></span>
+            </div>
+            <div class="transfer-cell">
+              <span class="transfer-label">CUIT</span>
+              <span id="bank-cuit" class="transfer-value"></span>
+            </div>
+            <div class="transfer-cell">
+              <span class="transfer-label">N° cuenta</span>
+              <span id="bank-cuenta" class="transfer-value"></span>
+            </div>
+            <div class="transfer-cell">
+              <span class="transfer-label">Banco</span>
+              <span id="bank-banco" class="transfer-value"></span>
             </div>
           </div>
-          <div class="transfer-row"><span>CBU</span><span id="bank-cbu"></span></div>
-          <div class="transfer-row"><span>Titular</span><span id="bank-titular"></span></div>
-          <div class="transfer-row"><span>CUIT</span><span id="bank-cuit"></span></div>
-          <div class="transfer-row"><span>N° de cuenta</span><span id="bank-cuenta"></span></div>
-          <div class="transfer-row"><span>Banco</span><span id="bank-banco"></span></div>
         </div>
       </div>
       <div class="client-section" id="client-section" style="display:none">
