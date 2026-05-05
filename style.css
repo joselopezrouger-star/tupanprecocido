@@ -37,7 +37,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 48px 24px 48px;
+  padding: 48px 24px 90px;
   position: relative;
   text-align: center;
 }
@@ -1016,8 +1016,8 @@ main {
    PAYMENT SECTION
 ══════════════════════════════ */
 .payment-section {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 4px;
+  padding-top: 10px;
   padding-bottom: 0;
   border-top: 1px solid var(--border);
 }
@@ -1072,28 +1072,29 @@ main {
 }
 
 .transfer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .transfer-cell {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
   min-width: 0;
 }
+
+.transfer-cell:last-child { border-bottom: none; }
 
 .transfer-label {
   font-size: 10px;
   font-weight: 700;
   color: var(--text-light);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+  min-width: 68px;
 }
 
 .transfer-value {
@@ -1101,10 +1102,13 @@ main {
   font-weight: 700;
   color: var(--text);
   word-break: break-all;
+  flex: 1;
+  text-align: right;
 }
 
 .transfer-cell .transfer-copy-cell {
-  justify-content: flex-start;
+  flex: 1;
+  justify-content: flex-end;
   gap: 6px;
 }
 
