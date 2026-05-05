@@ -528,7 +528,7 @@ function updateWheelFloatBtn() {
     }
   } else {
     if (heroBtn) {
-      heroBtn.querySelector('span:last-child').textContent = 'Girar la ruleta';
+      heroBtn.querySelector('span:last-child').textContent = 'Descuentos exclusivos';
     }
     if (headerBtn) headerBtn.classList.add('hidden');
   }
