@@ -8,14 +8,12 @@ let wheelSpinning = false;
 let currentWheelRotation = 0;
 
 const WHEEL_SEGMENTS = [
-  { label: '5%\ndescuento',  type: 'percent',  value: 5,  color: '#F5E6CC', textColor: '#3D2B1F' },
-  { label: 'Envio\ngratis',  type: 'shipping', value: 0,  color: '#C8E6C9', textColor: '#1B5E20' },
-  { label: '10%\ndescuento', type: 'percent',  value: 10, color: '#C17F3D', textColor: '#ffffff' },
-  { label: '20%\ndescuento', type: 'percent',  value: 20, color: '#8B5E2A', textColor: '#ffffff' },
-  { label: '15%\ndescuento', type: 'percent',  value: 15, color: '#F5E6CC', textColor: '#3D2B1F' },
-  { label: 'Envio\ngratis',  type: 'shipping', value: 0,  color: '#A5D6A7', textColor: '#1B5E20' },
-  { label: '10%\ndescuento', type: 'percent',  value: 10, color: '#C17F3D', textColor: '#ffffff' },
-  { label: '20%\ndescuento', type: 'percent',  value: 20, color: '#8B5E2A', textColor: '#ffffff' },
+  { label: '5%\ndescuento',            type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F' },
+  { label: '10%\ndescuento',           type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff' },
+  { label: 'Lactal Integral\ngratis',  type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'lactal-integral' },
+  { label: '20%\ndescuento',           type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F' },
+  { label: '15%\ndescuento',           type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff' },
+  { label: 'Flauton 2kg\ngratis',      type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'flauton-2kg' },
 ];
 
 async function init() {
@@ -42,6 +40,8 @@ function renderLanding() {
 
   document.getElementById('landing-about-p1').textContent = b.about;
   document.getElementById('landing-about-p2').textContent = b.about2;
+  document.getElementById('landing-about-p3').textContent = b.about3 || '';
+  document.getElementById('landing-about-p4').textContent = b.about4 || '';
   document.getElementById('footer-text').textContent = `© ${new Date().getFullYear()} ${b.name} · Todos los derechos reservados`;
 
   document.getElementById('hero-instagram').href = `https://instagram.com/${b.instagram}`;
@@ -80,7 +80,10 @@ function renderZoneButtons() {
   container.innerHTML = data.zones.map(zone => `
     <button class="zone-btn" data-zone="${zone.id}">
       <span class="zone-icon">📍</span>
-      <span class="zone-name">${zone.name}</span>
+      <span class="zone-text">
+        <span class="zone-name">${zone.name}</span>
+        ${zone.subtitle ? `<span class="zone-sub">${zone.subtitle}</span>` : ''}
+      </span>
     </button>
   `).join('');
 
@@ -327,6 +330,11 @@ function renderCartItems() {
       <span>Envio gratis (ruleta)</span>
       <span>Gratis</span>
     </div>`;
+  } else if (activeDiscount?.type === 'product') {
+    discountRowHTML = `<div class="summary-row discount">
+      <span>Premio ruleta: ${activeDiscount.label} 🎁</span>
+      <span>Incluido</span>
+    </div>`;
   }
 
   document.getElementById('payment-section').style.display = 'block';
@@ -380,6 +388,9 @@ function sendWhatsApp() {
       : []),
     ...(activeDiscount?.type === 'shipping'
       ? [`Descuento: Envio gratis (ruleta)`]
+      : []),
+    ...(activeDiscount?.type === 'product'
+      ? [`Premio ruleta: ${activeDiscount.label} (gratis)`]
       : []),
     `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
     `*Total: ${fmt(total)}*`,
@@ -596,9 +607,10 @@ function showWheelResult(winIndex) {
   const seg = WHEEL_SEGMENTS[winIndex];
 
   activeDiscount = {
-    type:  seg.type,
-    value: seg.value,
-    label: seg.label.replace('\n', ' '),
+    type:      seg.type,
+    value:     seg.value,
+    label:     seg.label.replace('\n', ' '),
+    productId: seg.productId || null,
   };
 
   localStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
