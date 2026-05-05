@@ -101,6 +101,7 @@ function selectZone(zoneId) {
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
+  document.getElementById('wheel-float-btn').classList.add('in-app');
 
   renderProducts();
   renderZoneBanner();
@@ -115,6 +116,7 @@ function goToLanding() {
   document.getElementById('app').classList.add('hidden');
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
+  document.getElementById('wheel-float-btn').classList.remove('in-app');
   cart = {};
   selectedZone = null;
   paymentMethod = null;
@@ -568,16 +570,16 @@ function drawWheel() {
     const lines = (seg.wheelLabel || seg.label).split('\n');
     const textR = radius * 0.60;
     if (lines.length === 2) {
-      // Line 1: big (value)
-      ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(lines[0], textR, -7);
-      // Line 2: small (OFF / GRATIS)
-      ctx.font = 'bold 9px -apple-system, BlinkMacSystemFont, sans-serif';
+      // Line 1: big (value / product name)
+      ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillText(lines[0], textR, -8);
+      // Line 2: smaller (OFF / GRATIS)
+      ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.globalAlpha = 0.85;
-      ctx.fillText(lines[1], textR, 7);
+      ctx.fillText(lines[1], textR, 9);
       ctx.globalAlpha = 1;
     } else {
-      ctx.font = 'bold 13px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.fillText(lines[0], textR, 4);
     }
     ctx.restore();
