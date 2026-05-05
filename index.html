@@ -231,6 +231,10 @@
           <button class="payment-btn" id="pay-transfer" onclick="selectPayment('transferencia')">🏦 Transferencia</button>
         </div>
         <div class="transfer-details hidden" id="transfer-details">
+          <button class="transfer-toggle-btn" id="transfer-toggle-btn" onclick="toggleTransferDetails()">
+            📋 Ver datos para transferir
+          </button>
+          <div id="transfer-data" class="hidden">
           <p class="transfer-title">💸 Datos para transferir</p>
           <div class="transfer-grid">
             <div class="transfer-cell">
@@ -260,6 +264,7 @@
               <span class="transfer-label">Banco</span>
               <span id="bank-banco" class="transfer-value"></span>
             </div>
+          </div>
           </div>
         </div>
       </div>
