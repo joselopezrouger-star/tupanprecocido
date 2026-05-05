@@ -35,9 +35,9 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  padding: 48px 24px 90px;
+  padding: clamp(36px, 8vh, 56px) 24px 60px;
   position: relative;
   text-align: center;
 }
@@ -49,19 +49,23 @@ body {
 
 /* Logo block (HTML recreation) */
 .hero-logo-block {
-  margin-bottom: 36px;
+  margin-bottom: 20px;
   user-select: none;
   width: 100%;
   max-width: 340px;
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
 }
 
 .logo-divider-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 8px 0;
+  margin: 0;
 }
 
 .logo-divider-line {
@@ -85,7 +89,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 2px 0;
+  padding: 0;
 }
 
 .logo-main {
@@ -112,13 +116,13 @@ body {
   color: rgba(61,43,31,0.88);
   line-height: 1.6;
   font-weight: 600;
-  margin-bottom: 36px;
+  margin-bottom: 20px;
 }
 
 .hero-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 
@@ -1064,10 +1068,26 @@ main {
   margin-top: 4px;
 }
 
+.transfer-toggle-btn {
+  width: 100%;
+  padding: 9px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--primary);
+  border-radius: 8px;
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.transfer-toggle-btn:hover { background: var(--primary-light); }
+
 .transfer-title {
   font-size: 13px;
   font-weight: 800;
   color: var(--primary-dark);
+  margin-top: 10px;
   margin-bottom: 10px;
 }
 

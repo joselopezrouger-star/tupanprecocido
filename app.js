@@ -460,21 +460,26 @@ function selectPayment(method) {
   if (method === 'transferencia') {
     details.classList.remove('hidden');
     renderBankDetails();
+    document.getElementById('transfer-data').classList.add('hidden');
+    document.getElementById('transfer-toggle-btn').textContent = '📋 Ver datos para transferir';
   } else {
     details.classList.add('hidden');
   }
   document.getElementById('client-section').style.display = 'block';
   document.getElementById('whatsapp-btn').disabled = false;
-  if (method === 'transferencia') {
+  setTimeout(() => {
+    document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 80);
+}
+
+function toggleTransferDetails() {
+  const dataEl = document.getElementById('transfer-data');
+  const btn = document.getElementById('transfer-toggle-btn');
+  const hidden = dataEl.classList.toggle('hidden');
+  btn.textContent = hidden ? '📋 Ver datos para transferir' : '🔼 Ocultar datos';
+  if (!hidden) {
     setTimeout(() => {
-      document.getElementById('transfer-details').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 80);
-    setTimeout(() => {
-      document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 1100);
-  } else {
-    setTimeout(() => {
-      document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      dataEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 80);
   }
 }
