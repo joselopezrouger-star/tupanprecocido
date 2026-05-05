@@ -91,18 +91,12 @@ body {
 
 .logo-main {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(62px, 17vw, 88px);
+  font-size: clamp(58px, 16vw, 92px);
   font-weight: 900;
   color: white;
   line-height: 1;
-  letter-spacing: -1px;
+  letter-spacing: 2px;
   text-shadow: 0 2px 12px rgba(0,0,0,0.14);
-}
-
-.logo-bread {
-  font-size: clamp(36px, 10vw, 52px);
-  line-height: 1;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
 }
 
 .hero-sub {
@@ -1139,7 +1133,7 @@ main {
   position: fixed;
   bottom: 20px;
   left: 16px;
-  z-index: 900;
+  z-index: 200;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1174,9 +1168,24 @@ main {
   line-height: 1;
 }
 
+.wheel-float-btn.in-app {
+  bottom: auto;
+  left: auto;
+  top: 58px;
+  right: 12px;
+  border-radius: 20px;
+  padding: 7px 12px;
+}
+
 .wheel-float-btn.won {
   background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
   box-shadow: 0 4px 18px rgba(46,125,50,0.45);
+}
+
+#wheel-close-buy-btn {
+  width: 100%;
+  margin-top: 4px;
+  justify-content: center;
 }
 
 /* ══════════════════════════════
