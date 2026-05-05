@@ -50,7 +50,8 @@ body {
 
 /* Logo block (HTML recreation) */
 .hero-logo-block {
-  margin-bottom: 28px;
+  margin-top: 32px;
+  margin-bottom: 36px;
   user-select: none;
   width: 100%;
   max-width: 340px;
@@ -434,8 +435,23 @@ header {
 }
 
 .header-left { display: flex; align-items: center; }
-.header-center { text-align: center; }
+.header-center { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+
+.header-discount-btn {
+  font-size: 11px;
+  font-weight: 800;
+  color: #2E7D32;
+  background: #E8F5E9;
+  border: 1.5px solid #A5D6A7;
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.header-discount-btn:hover { background: #C8E6C9; }
 
 .btn-back {
   background: none;
@@ -1169,12 +1185,7 @@ main {
 }
 
 .wheel-float-btn.in-app {
-  bottom: auto;
-  left: auto;
-  top: 58px;
-  right: 12px;
-  border-radius: 20px;
-  padding: 7px 12px;
+  display: none;
 }
 
 .wheel-float-btn.won {
