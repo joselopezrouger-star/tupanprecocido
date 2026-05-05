@@ -317,7 +317,7 @@ function renderCartItems() {
   let noticeHTML = '';
   if (shippingCost > 0 && shipping > 0 && missing > 0 && !shippingFree) {
     noticeHTML = `<div class="shipping-notice">
-      Agrega ${fmt(missing)} mas para envio gratis
+      Agregá ${fmt(missing)} más para envío gratis
     </div>`;
   }
 
@@ -487,27 +487,36 @@ function copyAlias() {
 // ══════════════════════════════
 
 function checkExistingDiscount() {
-  const saved = localStorage.getItem('tupan_discount');
+  const saved = sessionStorage.getItem('tupan_discount');
   if (!saved) return;
   try {
     activeDiscount = JSON.parse(saved);
     updateWheelFloatBtn();
   } catch(e) {
-    localStorage.removeItem('tupan_discount');
+    sessionStorage.removeItem('tupan_discount');
   }
 }
 
 function updateWheelFloatBtn() {
   const btn = document.getElementById('wheel-float-btn');
-  if (!btn) return;
+  const headerBtn = document.getElementById('header-discount-btn');
   if (activeDiscount) {
-    btn.classList.add('won');
-    btn.querySelector('.wheel-float-icon').textContent = '✅';
-    btn.querySelector('.wheel-float-label').textContent = activeDiscount.label;
+    if (btn) {
+      btn.classList.add('won');
+      btn.querySelector('.wheel-float-icon').textContent = '✅';
+      btn.querySelector('.wheel-float-label').textContent = activeDiscount.label;
+    }
+    if (headerBtn) {
+      headerBtn.textContent = '🎫 ' + activeDiscount.label;
+      headerBtn.classList.remove('hidden');
+    }
   } else {
-    btn.classList.remove('won');
-    btn.querySelector('.wheel-float-icon').textContent = '🎡';
-    btn.querySelector('.wheel-float-label').textContent = 'Descuento';
+    if (btn) {
+      btn.classList.remove('won');
+      btn.querySelector('.wheel-float-icon').textContent = '🎡';
+      btn.querySelector('.wheel-float-label').textContent = 'Descuento';
+    }
+    if (headerBtn) headerBtn.classList.add('hidden');
   }
 }
 
@@ -628,7 +637,7 @@ function showWheelResult(winIndex) {
     productId: seg.productId || null,
   };
 
-  localStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
+  sessionStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
 
   // Ocultar la ruleta para que el resultado y el botón queden visibles
   document.querySelector('.wheel-container').style.display = 'none';
