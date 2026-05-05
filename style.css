@@ -37,7 +37,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 48px 24px 0;
+  padding: 48px 24px 48px;
   position: relative;
   text-align: center;
 }
@@ -45,12 +45,10 @@ body {
 .hero-content {
   max-width: 480px;
   width: 100%;
-  padding-bottom: 60px;
 }
 
 /* Logo block (HTML recreation) */
 .hero-logo-block {
-  margin-top: 32px;
   margin-bottom: 36px;
   user-select: none;
   width: 100%;
@@ -813,7 +811,7 @@ main {
 
 .close-btn:hover { background: #d0b99a; }
 
-.cart-scroll-area { flex: 1; overflow-y: auto; padding: 8px 20px 0; }
+.cart-scroll-area { flex: 1; overflow-y: auto; padding: 8px 20px 0; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .cart-items { }
 
 .empty-cart {
@@ -1073,18 +1071,48 @@ main {
   margin-bottom: 10px;
 }
 
-.transfer-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 5px 0;
-  font-size: 13px;
-  border-bottom: 1px solid var(--border);
+.transfer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
-.transfer-row:last-child { border-bottom: none; }
+.transfer-cell {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
 
-.transfer-row span:first-child { color: var(--text-light); }
-.transfer-row span:last-child  { font-weight: 700; color: var(--text); text-align: right; word-break: break-all; }
+.transfer-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.transfer-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.transfer-cell .transfer-copy-cell {
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.transfer-cell .transfer-copy-cell span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
 
 /* ── Client section ── */
 .client-section {
@@ -1142,56 +1170,6 @@ main {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ══════════════════════════════
-   WHEEL FLOAT BUTTON
-══════════════════════════════ */
-.wheel-float-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 16px;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, #FF6B35 0%, #E8401A 100%);
-  color: white;
-  border: none;
-  border-radius: 16px;
-  cursor: pointer;
-  box-shadow: 0 4px 18px rgba(232,64,26,0.5);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.wheel-float-btn:hover  { box-shadow: 0 6px 22px rgba(232,64,26,0.65); }
-.wheel-float-btn:active { transform: scale(0.95); }
-
-.wheel-float-icon {
-  font-size: 24px;
-  animation: wobble 2.4s ease-in-out infinite;
-}
-
-@keyframes wobble {
-  0%, 100% { transform: rotate(-10deg); }
-  50%       { transform: rotate(10deg); }
-}
-
-.wheel-float-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.3px;
-  line-height: 1;
-}
-
-.wheel-float-btn.in-app {
-  display: none;
-}
-
-.wheel-float-btn.won {
-  background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
-  box-shadow: 0 4px 18px rgba(46,125,50,0.45);
-}
 
 #wheel-close-buy-btn {
   width: 100%;

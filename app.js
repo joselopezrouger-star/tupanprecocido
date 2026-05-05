@@ -101,7 +101,6 @@ function selectZone(zoneId) {
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
-  document.getElementById('wheel-float-btn').classList.add('in-app');
 
   renderProducts();
   renderZoneBanner();
@@ -116,7 +115,6 @@ function goToLanding() {
   document.getElementById('app').classList.add('hidden');
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
-  document.getElementById('wheel-float-btn').classList.remove('in-app');
   cart = {};
   selectedZone = null;
   paymentMethod = null;
@@ -247,18 +245,36 @@ function getEffectivePrice(product) {
   return (sale != null && sale < base) ? sale : base;
 }
 
+function lockBodyScroll() {
+  const scrollY = window.scrollY;
+  document.body.dataset.scrollY = scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.style.overflow = 'hidden';
+}
+
+function unlockBodyScroll() {
+  const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  document.body.style.overflow = '';
+  window.scrollTo(0, scrollY);
+}
+
 function openCart() {
   renderCartItems();
   document.getElementById('cart-panel').classList.add('open');
   document.getElementById('cart-overlay-bg').classList.add('open');
   document.getElementById('floating-cart')?.classList.add('hidden');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
 }
 
 function closeCart() {
   document.getElementById('cart-panel').classList.remove('open');
   document.getElementById('cart-overlay-bg').classList.remove('open');
-  document.body.style.overflow = '';
+  unlockBodyScroll();
   updateCartBtn();
 }
 
@@ -309,8 +325,9 @@ function renderCartItems() {
     shippingFree = true;
   }
 
+  const originallyFreeShipping = subtotal >= freeThreshold;
   const subtotalAfterDiscount = subtotal - discountAmount;
-  const shipping = (shippingFree || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
+  const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
   const total = subtotalAfterDiscount + shipping;
   const missing = freeThreshold - subtotalAfterDiscount;
 
@@ -368,8 +385,9 @@ function sendWhatsApp() {
   } else if (activeDiscount?.type === 'shipping') {
     shippingFree = true;
   }
+  const originallyFreeShipping = subtotal >= selectedZone.shipping.freeThreshold;
   const subtotalAfterDiscount = subtotal - discountAmount;
-  const shipping = (shippingFree || subtotalAfterDiscount >= selectedZone.shipping.freeThreshold) ? 0 : selectedZone.shipping.cost;
+  const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= selectedZone.shipping.freeThreshold) ? 0 : selectedZone.shipping.cost;
   const total = subtotalAfterDiscount + shipping;
 
   const lines = cartItems.map(({ product, qty }) => {
@@ -498,23 +516,19 @@ function checkExistingDiscount() {
 }
 
 function updateWheelFloatBtn() {
-  const btn = document.getElementById('wheel-float-btn');
+  const heroBtn = document.getElementById('hero-wheel-btn');
   const headerBtn = document.getElementById('header-discount-btn');
   if (activeDiscount) {
-    if (btn) {
-      btn.classList.add('won');
-      btn.querySelector('.wheel-float-icon').textContent = '✅';
-      btn.querySelector('.wheel-float-label').textContent = activeDiscount.label;
+    if (heroBtn) {
+      heroBtn.querySelector('span:last-child').textContent = '✅ ' + activeDiscount.label;
     }
     if (headerBtn) {
       headerBtn.textContent = '🎫 ' + activeDiscount.label;
       headerBtn.classList.remove('hidden');
     }
   } else {
-    if (btn) {
-      btn.classList.remove('won');
-      btn.querySelector('.wheel-float-icon').textContent = '🎡';
-      btn.querySelector('.wheel-float-label').textContent = 'Descuento';
+    if (heroBtn) {
+      heroBtn.querySelector('span:last-child').textContent = 'Girar la ruleta';
     }
     if (headerBtn) headerBtn.classList.add('hidden');
   }
@@ -522,7 +536,7 @@ function updateWheelFloatBtn() {
 
 function openWheelModal() {
   document.getElementById('wheel-overlay').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  lockBodyScroll();
   drawWheel();
 
   if (activeDiscount) {
@@ -538,8 +552,7 @@ function openWheelModal() {
 
 function closeWheelModal() {
   document.getElementById('wheel-overlay').classList.add('hidden');
-  document.body.style.overflow = '';
-  // Restaurar visibilidad para próxima apertura
+  unlockBodyScroll();
   document.querySelector('.wheel-container').style.display = '';
   document.querySelector('#wheel-overlay .overlay-sub').style.display = '';
 }
@@ -571,25 +584,27 @@ function drawWheel() {
     ctx.stroke();
 
     ctx.save();
-    ctx.translate(cx, cy);
     const midAngle = startAngle + segAngle / 2;
-    ctx.rotate(midAngle);
+    const textR = radius * 0.58;
+
+    // Translate to center of segment (radially)
+    ctx.translate(cx + textR * Math.cos(midAngle), cy + textR * Math.sin(midAngle));
+    // Rotate so character tops face the outer rim
+    ctx.rotate(midAngle + Math.PI / 2);
+
     ctx.textAlign = 'center';
     ctx.fillStyle = seg.textColor;
     const lines = (seg.wheelLabel || seg.label).split('\n');
-    const textR = radius * 0.60;
     if (lines.length === 2) {
-      // Line 1: big (value / product name)
       ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(lines[0], textR, -8);
-      // Line 2: smaller (OFF / GRATIS)
+      ctx.fillText(lines[0], 0, -10);
       ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.globalAlpha = 0.85;
-      ctx.fillText(lines[1], textR, 9);
+      ctx.fillText(lines[1], 0, 8);
       ctx.globalAlpha = 1;
     } else {
       ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(lines[0], textR, 4);
+      ctx.fillText(lines[0], 0, 5);
     }
     ctx.restore();
   });
