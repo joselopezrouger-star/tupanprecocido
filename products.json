@@ -4,8 +4,10 @@
     "whatsapp": "541158098137",
     "instagram": "tupanprecocido",
     "location": "Bella Vista, Buenos Aires",
-    "about": "Somos una panadería familiar con años de experiencia en la elaboración de panes precocidos de la más alta calidad. Nuestros productos están hechos con ingredientes seleccionados para que vos los termines de hornear en casa y los disfrutes como recién salidos del horno.",
-    "about2": "Trabajamos con pasión y dedicación para llevar el mejor pan a tu mesa. Cada producto es elaborado con amor y los mejores ingredientes.",
+    "about": "Nacimos hace más de 20 años con una sola obsesión: hacer buen pan.",
+    "about2": "Arrancamos como una fábrica familiar y con el tiempo fuimos perfeccionando lo que hacemos: pan precocido de calidad, listo para que vos lo termines de hornear en casa. Sin misterios, sin procesos raros. Solo pan de verdad.",
+    "about3": "El concepto es simple: comprás, congelás, horneás cuando querés y en minutos tenés pan recién hecho en tu mesa. Como siempre debería ser.",
+    "about4": "Porque el mejor pan no es el que sale de una bolsa. Es el que sale de tu horno.",
     "bank": {
       "alias": "panprecocido",
       "cbu": "0720221888000038813636",
@@ -19,6 +21,7 @@
     {
       "id": "bellavista",
       "name": "Bella Vista",
+      "subtitle": "y alrededores",
       "description": "Bella Vista y alrededores",
       "shipping": {
         "cost": 3000,
@@ -28,7 +31,7 @@
     },
     {
       "id": "cabazonanorte",
-      "name": "CABA y Zona Norte",
+      "name": "CABA o Zona Norte",
       "description": "CABA, Zona Norte y alrededores",
       "shipping": {
         "cost": 4000,
