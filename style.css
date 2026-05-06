@@ -58,7 +58,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 10px;
+  gap: 0;
 }
 
 .logo-divider-row {
@@ -90,6 +90,8 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 0;
+  margin-top: 4px;
+  margin-bottom: 12px;
 }
 
 .logo-main {
@@ -112,10 +114,12 @@ body {
 }
 
 .hero-tagline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
   font-size: 18px;
-  color: rgba(61,43,31,0.88);
+  color: rgba(61,43,31,0.9);
   line-height: 1.6;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 20px;
 }
 
@@ -168,6 +172,16 @@ body {
 }
 
 .action-btn--whatsapp:hover { background: var(--green-dark); }
+
+.action-btn--wheel {
+  background: white;
+  color: var(--primary-dark);
+  border: 2px solid white;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  font-weight: 800;
+}
+
+.action-btn--wheel:hover { background: rgba(255,255,255,0.92); box-shadow: 0 6px 20px rgba(0,0,0,0.22); }
 
 .hero-wave {
   position: absolute;
