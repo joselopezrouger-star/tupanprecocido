@@ -45,7 +45,7 @@
       "id": "flauton-2kg",
       "name": "Flauton x 2kg",
       "description": "Pan francés clásico",
-      "image": "img/flauton.jpg",
+      "image": "img/flauton.png",
       "prices": {
         "bellavista": 8600,
         "cabazonanorte": 10500
@@ -55,7 +55,7 @@
       "id": "flauton-5kg",
       "name": "Flauton x 5kg",
       "description": "Pan francés clásico, tamaño grande",
-      "image": "img/flauton.jpg",
+      "image": "img/flauton.png",
       "prices": {
         "bellavista": 19000,
         "cabazonanorte": 22500
@@ -65,7 +65,7 @@
       "id": "mignon-2kg",
       "name": "Mignon x 2kg",
       "description": "Pancitos pequeños",
-      "image": "",
+      "image": "img/mignon.png",
       "prices": {
         "bellavista": 8600,
         "cabazonanorte": 10500
@@ -75,7 +75,7 @@
       "id": "salvado-2kg",
       "name": "Pan de Salvado x 2kg",
       "description": "Pan integral con salvado",
-      "image": "",
+      "image": "img/salvado.png",
       "prices": {
         "bellavista": 8600,
         "cabazonanorte": 10500
@@ -85,7 +85,7 @@
       "id": "criollos-2kg",
       "name": "Criollos x 2kg",
       "description": "Pan tradicional criollo",
-      "image": "img/criollos.jpg",
+      "image": "img/criollos.png",
       "prices": {
         "bellavista": 8600,
         "cabazonanorte": 10500
@@ -95,7 +95,7 @@
       "id": "campo-2kg",
       "name": "Pan de Campo x 2kg",
       "description": "Pan rústico de campo",
-      "image": "",
+      "image": "img/campo.png",
       "prices": {
         "bellavista": 8600,
         "cabazonanorte": 10500
@@ -105,7 +105,7 @@
       "id": "mix-4kg",
       "name": "MIX x 4kg",
       "description": "Variedad de panes surtidos",
-      "image": "",
+      "image": "img/mix.png",
       "prices": {
         "bellavista": 18000,
         "cabazonanorte": 21000
@@ -125,7 +125,7 @@
       "id": "minibaguette",
       "name": "Mini Baguette x 3 unidades",
       "description": "Baguettes pequeñas, pack de 3",
-      "image": "",
+      "image": "img/minibaguette.png",
       "prices": {
         "bellavista": 3400,
         "cabazonanorte": 4000
@@ -135,7 +135,7 @@
       "id": "lactal-blanco",
       "name": "Pan Lactal Blanco",
       "description": "Pan de molde blanco clásico",
-      "image": "img/lactal-blanco.jpg",
+      "image": "img/lactal-blanco.png",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
@@ -145,7 +145,7 @@
       "id": "lactal-integral",
       "name": "Pan Lactal Integral con Semillas",
       "description": "Pan de molde integral con semillas",
-      "image": "img/lactal-integral.jpg",
+      "image": "img/lactal-integral.png",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
@@ -155,7 +155,7 @@
       "id": "lactal-salvado",
       "name": "Pan Lactal Salvado",
       "description": "Pan de molde con salvado",
-      "image": "img/lactal-salvado.jpg",
+      "image": "img/lactal-salvado.png",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
