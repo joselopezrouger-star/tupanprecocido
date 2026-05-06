@@ -115,7 +115,7 @@
       "id": "zeppelin",
       "name": "Zeppelin Integral x unidad",
       "description": "Pan integral individual",
-      "image": "",
+      "image": "img/zeppelin.jpg",
       "prices": {
         "bellavista": 3800,
         "cabazonanorte": 4500

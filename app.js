@@ -172,7 +172,6 @@ function productCardHTML(product, price, salePrice) {
       <div class="product-info">
         <div class="product-top">
           <div class="product-name">${product.name}</div>
-          ${product.description ? `<div class="product-desc">${product.description}</div>` : ''}
         </div>
         <div class="product-footer">
           ${priceHTML}
