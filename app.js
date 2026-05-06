@@ -152,7 +152,7 @@ function renderProducts() {
 function productCardHTML(product, price, salePrice) {
   const qty = cart[product.id] || 0;
   const imgContent = product.image
-    ? `<img src="${product.image}" alt="${product.name}" onerror="this.parentElement.innerHTML='🍞'">`
+    ? `<img src="${product.image}" alt="${product.name}" loading="lazy" onload="this.classList.add('img-loaded')" onerror="this.parentElement.innerHTML='🍞'">`
     : '🍞';
 
   const hasPromo = salePrice != null && salePrice < price;

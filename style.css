@@ -668,7 +668,15 @@ main {
   overflow: hidden;
 }
 
-.product-img img { width: 100%; height: 100%; object-fit: cover; }
+.product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-img img.img-loaded { opacity: 1; }
 
 .product-info {
   padding: 12px;
