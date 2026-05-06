@@ -1,3 +1,5 @@
+const WHEEL_ENABLED = true; // ← cambiá a false para desactivar la ruleta
+
 let data = null;
 let selectedZone = null;
 let cart = {};
@@ -29,6 +31,11 @@ async function init() {
   renderZoneButtons();
   bindEvents();
   checkExistingDiscount();
+
+  if (!WHEEL_ENABLED) {
+    document.getElementById('hero-wheel-btn')?.classList.add('hidden');
+    document.getElementById('wheel-overlay')?.classList.add('hidden');
+  }
 }
 
 // ══════════════════════════════
@@ -392,31 +399,34 @@ function sendWhatsApp() {
 
   const lines = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
-    return `— [ ${qty} ] ${product.name} > ${fmt(price * qty)}`;
+    return `• ${product.name} × ${qty}   ${fmt(price * qty)}`;
   }).join('\n');
 
-  const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
+  const pagoLabel = paymentMethod === 'transferencia' ? '🏦 Transferencia bancaria' : '💵 Efectivo';
 
   const parts = [
-    `Hola! Quiero hacer un pedido:`,
+    `🥖 *¡Hola! Quiero hacer un pedido de TUPAN Precocido:*`,
     ``,
+    `🛒 *Productos:*`,
     lines,
     ``,
+    `📋 *Resumen:*`,
     `Subtotal: ${fmt(subtotal)}`,
     ...(activeDiscount?.type === 'percent' && discountAmount > 0
-      ? [`Descuento (${activeDiscount.label}): -${fmt(discountAmount)}`]
+      ? [`🎡 Descuento (${activeDiscount.value}%): -${fmt(discountAmount)}`]
       : []),
     ...(activeDiscount?.type === 'shipping'
-      ? [`Descuento: Envio gratis (ruleta)`]
+      ? [`🎡 Descuento ruleta: Envío gratis ✓`]
       : []),
     ...(activeDiscount?.type === 'product'
-      ? [`Premio ruleta: ${activeDiscount.label} (gratis)`]
+      ? [`🎁 Premio ruleta: ${activeDiscount.label} (gratis)`]
       : []),
-    `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
-    `*Total: ${fmt(total)}*`,
+    `🚚 Envío: ${shipping === 0 ? 'Gratis ✓' : fmt(shipping)}`,
     ``,
-    `Medio de pago: ${pagoLabel}`,
-    `Zona: ${selectedZone.name}`,
+    `💰 *Total: ${fmt(total)}*`,
+    ``,
+    `💳 Pago: ${pagoLabel}`,
+    `📍 Zona: ${selectedZone.name}`,
   ];
 
   if (clientType === 'nuevo') {
@@ -427,11 +437,11 @@ function sendWhatsApp() {
     const entrecalles = document.getElementById('field-entrecalles').value.trim();
     parts.push(
       ``,
-      `--- Datos del cliente ---`,
+      `👤 *Datos del cliente:*`,
       `Nombre: ${nombre} ${apellido}`,
-      `Direccion: ${direccion}`,
-      `Barrio/Lote: ${barrio}`,
-      `Entre calles: ${entrecalles}`
+      `📍 Dirección: ${direccion}`,
+      `🏘️ Barrio/Lote: ${barrio}`,
+      `↔️ Entre calles: ${entrecalles}`
     );
   }
 
