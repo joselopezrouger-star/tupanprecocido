@@ -439,8 +439,8 @@ function sendWhatsApp() {
       `👤 *Datos del cliente:*`,
       `Nombre: ${nombre} ${apellido}`,
       `📍 Dirección: ${direccion}`,
-      `🏘️ Barrio/Lote: ${barrio}`,
-      `↔️ Entre calles: ${entrecalles}`
+      `📌 Barrio/Lote: ${barrio}`,
+      `📌 Entre calles: ${entrecalles}`
     );
   }
 
@@ -519,13 +519,13 @@ function copyAlias() {
 // ══════════════════════════════
 
 function checkExistingDiscount() {
-  const saved = sessionStorage.getItem('tupan_discount');
+  const saved = localStorage.getItem('tupan_discount');
   if (!saved) return;
   try {
     activeDiscount = JSON.parse(saved);
     updateWheelFloatBtn();
   } catch(e) {
-    sessionStorage.removeItem('tupan_discount');
+    localStorage.removeItem('tupan_discount');
   }
 }
 
@@ -666,7 +666,7 @@ function showWheelResult(winIndex) {
     productId: seg.productId || null,
   };
 
-  sessionStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
+  localStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
 
   // Ocultar la ruleta para que el resultado y el botón queden visibles
   document.querySelector('.wheel-container').style.display = 'none';
