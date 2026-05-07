@@ -398,34 +398,33 @@ function sendWhatsApp() {
 
   const lines = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
-    return `• ${product.name} × ${qty}   ${fmt(price * qty)}`;
+    return `• [${qty}x] ${product.name}   ${fmt(price * qty)}`;
   }).join('\n');
 
-  const pagoLabel = paymentMethod === 'transferencia' ? '🏦 Transferencia bancaria' : '💵 Efectivo';
+  const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
 
   const parts = [
-    `🥖 *¡Hola! Quiero hacer un pedido de TUPAN Precocido:*`,
+    `*Hola! Quiero hacer un pedido de TUPAN Precocido:*`,
     ``,
-    `🛒 *Productos:*`,
+    `*Productos:*`,
     lines,
     ``,
-    `📋 *Resumen:*`,
+    `*Resumen:*`,
     `Subtotal: ${fmt(subtotal)}`,
     ...(activeDiscount?.type === 'percent' && discountAmount > 0
-      ? [`🎡 Descuento (${activeDiscount.value}%): -${fmt(discountAmount)}`]
+      ? [`Descuento (${activeDiscount.value}%): -${fmt(discountAmount)}`]
       : []),
     ...(activeDiscount?.type === 'shipping'
-      ? [`🎡 Descuento ruleta: Envío gratis ✓`]
+      ? [`Descuento ruleta: Envio gratis`]
       : []),
     ...(activeDiscount?.type === 'product'
-      ? [`🎁 Premio ruleta: ${activeDiscount.label} (gratis)`]
+      ? [`Premio ruleta: ${activeDiscount.label}`]
       : []),
-    `🚚 Envío: ${shipping === 0 ? 'Gratis ✓' : fmt(shipping)}`,
+    `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
+    `*Total: ${fmt(total)}*`,
     ``,
-    `💰 *Total: ${fmt(total)}*`,
-    ``,
-    `💳 Pago: ${pagoLabel}`,
-    `📍 Zona: ${selectedZone.name}`,
+    `Pago: ${pagoLabel}`,
+    `Zona: ${selectedZone.name}`,
   ];
 
   if (clientType === 'nuevo') {
@@ -436,11 +435,11 @@ function sendWhatsApp() {
     const entrecalles = document.getElementById('field-entrecalles').value.trim();
     parts.push(
       ``,
-      `👤 *Datos del cliente:*`,
+      `*Datos del cliente:*`,
       `Nombre: ${nombre} ${apellido}`,
-      `📍 Dirección: ${direccion}`,
-      `🏘️ Barrio/Lote: ${barrio}`,
-      `↔️ Entre calles: ${entrecalles}`
+      `Direccion: ${direccion}`,
+      `Barrio/Lote: ${barrio}`,
+      `Entre calles: ${entrecalles}`
     );
   }
 
@@ -519,13 +518,13 @@ function copyAlias() {
 // ══════════════════════════════
 
 function checkExistingDiscount() {
-  const saved = sessionStorage.getItem('tupan_discount');
+  const saved = localStorage.getItem('tupan_discount');
   if (!saved) return;
   try {
     activeDiscount = JSON.parse(saved);
     updateWheelFloatBtn();
   } catch(e) {
-    sessionStorage.removeItem('tupan_discount');
+    localStorage.removeItem('tupan_discount');
   }
 }
 
@@ -666,7 +665,7 @@ function showWheelResult(winIndex) {
     productId: seg.productId || null,
   };
 
-  sessionStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
+  localStorage.setItem('tupan_discount', JSON.stringify(activeDiscount));
 
   // Ocultar la ruleta para que el resultado y el botón queden visibles
   document.querySelector('.wheel-container').style.display = 'none';
