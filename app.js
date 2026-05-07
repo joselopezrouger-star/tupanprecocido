@@ -335,7 +335,7 @@ function renderCartItems() {
   const subtotalAfterDiscount = subtotal - discountAmount;
   const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
   const total = subtotalAfterDiscount + shipping;
-  const missing = freeThreshold - subtotalAfterDiscount;
+  const missing = freeThreshold - subtotal;
 
   let noticeHTML = '';
   if (shippingCost > 0 && shipping > 0 && missing > 0 && !shippingFree) {
