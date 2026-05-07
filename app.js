@@ -10,12 +10,12 @@ let wheelSpinning = false;
 let currentWheelRotation = 0;
 
 const WHEEL_SEGMENTS = [
-  { wheelLabel: '5%\nOFF',         label: '5% de descuento',              type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F' },
-  { wheelLabel: '10%\nOFF',        label: '10% de descuento',             type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff' },
-  { wheelLabel: 'Lactal\nGRATIS',  label: 'Pan Lactal GRATIS',            type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'lactal-integral' },
-  { wheelLabel: '20%\nOFF',        label: '20% de descuento',             type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F' },
-  { wheelLabel: '15%\nOFF',        label: '15% de descuento',             type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff' },
-  { wheelLabel: 'Lactal\nGRATIS',  label: 'Pan Lactal GRATIS',            type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', productId: 'lactal-integral' },
+  { wheelLabel: '5%\nOFF',        label: '5% de descuento',   type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F', weight: 35 },
+  { wheelLabel: '10%\nOFF',       label: '10% de descuento',  type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff', weight: 30 },
+  { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
+  { wheelLabel: '20%\nOFF',       label: '20% de descuento',  type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
+  { wheelLabel: '15%\nOFF',       label: '15% de descuento',  type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff', weight: 14 },
+  { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
 ];
 
 async function init() {
@@ -631,6 +631,16 @@ function drawWheel() {
   ctx.stroke();
 }
 
+function weightedRandom() {
+  const total = WHEEL_SEGMENTS.reduce((s, seg) => s + seg.weight, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < WHEEL_SEGMENTS.length; i++) {
+    r -= WHEEL_SEGMENTS[i].weight;
+    if (r <= 0) return i;
+  }
+  return WHEEL_SEGMENTS.length - 1;
+}
+
 function spinWheel() {
   if (wheelSpinning) return;
   wheelSpinning = true;
@@ -638,10 +648,10 @@ function spinWheel() {
   const spinBtn = document.getElementById('spin-btn');
   spinBtn.disabled = true;
 
-  const winIndex = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+  const winIndex = weightedRandom();
   const segDeg = 360 / WHEEL_SEGMENTS.length;
   const winCenterDeg = winIndex * segDeg + segDeg / 2;
-  const extraSpins = 1800;
+  const extraSpins = 2520;
   const targetRotation = currentWheelRotation + extraSpins + (360 - (currentWheelRotation % 360) - winCenterDeg + 360) % 360;
 
   currentWheelRotation = targetRotation;
@@ -652,7 +662,7 @@ function spinWheel() {
   setTimeout(() => {
     wheelSpinning = false;
     showWheelResult(winIndex);
-  }, 4100);
+  }, 6200);
 }
 
 function showWheelResult(winIndex) {
