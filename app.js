@@ -398,7 +398,7 @@ function sendWhatsApp() {
 
   const lines = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
-    return `• ${product.name} × ${qty}   ${fmt(price * qty)}`;
+    return `• [${qty}x] ${product.name}   ${fmt(price * qty)}`;
   }).join('\n');
 
   const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
