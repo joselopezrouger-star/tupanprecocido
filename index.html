@@ -34,12 +34,15 @@
           </div>
         </div>
 
-        <div class="hero-img">
-          <img src="img/salvado.png" alt="Pan TUPAN Precocido">
+        <div class="hero-card">
+          <div class="hero-img">
+            <img src="img/salvado.png" alt="Pan TUPAN Precocido">
+          </div>
+          <div class="hero-card-text">
+            <p class="hero-tagline">El pan recién horneado que siempre quisiste, sin salir de tu casa.</p>
+            <p class="hero-tagline-sub">Sin conservantes. Sin aditivos. Horneado por vos en solo 15 minutos.</p>
+          </div>
         </div>
-
-        <p class="hero-tagline">El pan recién horneado <em>en tu casa</em>, cuando vos querás.</p>
-        <p class="hero-tagline-sub">Lo guardás en el freezer. Lo terminás en 15 minutos. Te queda como recién salido del horno.</p>
 
         <div class="hero-actions">
           <button id="hero-order-btn" class="action-btn action-btn--primary">
@@ -58,10 +61,22 @@
     </section>
 
     <div class="hero-secondary-links">
-      <button class="secondary-link" onclick="scrollToHow()">ℹ️ Cómo funciona</button>
-      <button class="secondary-link" onclick="scrollToAbout()">🥖 Quiénes somos</button>
-      <a id="hero-instagram" class="secondary-link" target="_blank" rel="noopener">📸 Instagram</a>
-      <a id="hero-whatsapp" class="secondary-link" target="_blank" rel="noopener">💬 Escribinos</a>
+      <button class="secondary-link secondary-link--how" onclick="scrollToHow()">
+        <span class="secondary-link-icon">ℹ️</span>
+        <span class="secondary-link-label">Cómo funciona</span>
+      </button>
+      <button class="secondary-link secondary-link--about" onclick="scrollToAbout()">
+        <span class="secondary-link-icon">🥖</span>
+        <span class="secondary-link-label">Quiénes somos</span>
+      </button>
+      <a id="hero-instagram" class="secondary-link secondary-link--instagram" target="_blank" rel="noopener">
+        <span class="secondary-link-icon">📸</span>
+        <span class="secondary-link-label">Instagram</span>
+      </a>
+      <a id="hero-whatsapp" class="secondary-link secondary-link--whatsapp" target="_blank" rel="noopener">
+        <span class="secondary-link-icon">💬</span>
+        <span class="secondary-link-label">Escribinos</span>
+      </a>
     </div>
 
     <section class="how-it-works" id="how-it-works">
