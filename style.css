@@ -35,7 +35,7 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding: clamp(24px, 5vh, 40px) 24px 60px;
   position: relative;
@@ -45,10 +45,15 @@ body {
 .hero-content {
   max-width: 480px;
   width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Logo block (HTML recreation) */
 .hero-logo-block {
+  flex: 1;
+  justify-content: center;
   margin-bottom: 20px;
   user-select: none;
   width: 100%;
@@ -363,20 +368,19 @@ body {
   text-align: left;
 }
 
-.step-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+.step-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: white;
+  justify-content: space-between;
+  width: 100%;
 }
-.step-icon--order    { background: #C17F3D; }
-.step-icon--delivery { background: #6B4226; }
-.step-icon--freeze   { background: #5B92C4; }
-.step-icon--bake     { background: #D84315; }
+
+.step-icon {
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
 
 .step-body {
   display: flex;
@@ -385,8 +389,8 @@ body {
 }
 
 .step-num {
-  background: #2C1F14;
-  color: white;
+  background: var(--primary-dark);
+  color: white !important;
   font-size: 12px;
   font-weight: 800;
   width: 22px;
@@ -395,7 +399,6 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 4px;
   flex-shrink: 0;
   line-height: 1;
 }
@@ -466,7 +469,7 @@ body {
   object-fit: cover;
   object-position: center;
   display: block;
-  opacity: 0.18;
+  opacity: 0.08;
 }
 
 .contact-list {
