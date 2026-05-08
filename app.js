@@ -647,45 +647,50 @@ function weightedRandom() {
 function playWheelSounds() {
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return;
-  const ctx = new AudioCtx();
+  let ctx;
+  try { ctx = new AudioCtx(); } catch(e) { return; }
 
-  function schedule() {
-    function tick(time) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = 220;
-      osc.type = 'triangle';
-      gain.gain.setValueAtTime(0.4, time);
-      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
-      osc.start(time);
-      osc.stop(time + 0.07);
-    }
-
-    for (let i = 0; i < 60; i++) {
-      const progress = i / 60;
-      const t = 6.0 * (1 - Math.pow(1 - progress, 2.5));
-      tick(ctx.currentTime + t);
-    }
-
-    [523, 659, 784, 1047].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = freq;
-      osc.type = 'sine';
-      const t = ctx.currentTime + 6.25 + i * 0.13;
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.5, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-      osc.start(t);
-      osc.stop(t + 0.55);
-    });
+  function beep(freq, vol, dur) {
+    try {
+      if (ctx.state === 'suspended') ctx.resume();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq;
+      o.type = 'triangle';
+      g.gain.setValueAtTime(vol, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      o.start(ctx.currentTime);
+      o.stop(ctx.currentTime + dur + 0.01);
+    } catch(e) {}
   }
 
-  ctx.resume().then(schedule);
+  function chime(freq, delay) {
+    setTimeout(() => {
+      try {
+        if (ctx.state === 'suspended') ctx.resume();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = freq;
+        o.type = 'sine';
+        g.gain.setValueAtTime(0.55, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+        o.start(ctx.currentTime);
+        o.stop(ctx.currentTime + 0.6);
+      } catch(e) {}
+    }, delay);
+  }
+
+  // Ticks que desaceleran a lo largo de 6 segundos
+  for (let i = 0; i < 58; i++) {
+    const progress = i / 58;
+    const t = 6000 * (1 - Math.pow(1 - progress, 2.5));
+    setTimeout(() => beep(250, 0.5, 0.055), t);
+  }
+
+  // Acorde final
+  [523, 659, 784, 1047].forEach((freq, i) => chime(freq, 6300 + i * 130));
 }
 
 function spinWheel() {
