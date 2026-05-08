@@ -176,7 +176,7 @@ body {
 
 .hero-tagline {
   font-family: 'Newsreader', Georgia, serif;
-  font-weight: 400;
+  font-weight: 300;
   font-size: 22px;
   color: #2C1F14;
   line-height: 1.1;
@@ -494,7 +494,7 @@ body {
 .overlay {
   position: fixed;
   inset: 0;
-  background: linear-gradient(145deg, #C17F3D 0%, #7A4A1E 100%);
+  background: #E5B83A;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -65,7 +65,7 @@
       "id": "mignon-2kg",
       "name": "Mignon x 2kg",
       "description": "Pancitos pequeños",
-      "image": "img/mignon.png",
+      "image": "img/mignon.jpg",
       "prices": {
         "bellavista": 8600,
         "cabazonanorte": 10500
@@ -125,7 +125,7 @@
       "id": "minibaguette",
       "name": "Mini Baguette x 3 unidades",
       "description": "Baguettes pequeñas, pack de 3",
-      "image": "img/minibaguette.png",
+      "image": "img/minibaguette.jpg",
       "prices": {
         "bellavista": 3400,
         "cabazonanorte": 4000
