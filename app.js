@@ -1,5 +1,8 @@
 const WHEEL_ENABLED = true; // ← cambiá a false para desactivar la ruleta
 
+history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+
 let data = null;
 let selectedZone = null;
 let cart = {};
