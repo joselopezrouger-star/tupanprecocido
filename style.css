@@ -35,7 +35,7 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   padding: clamp(24px, 5vh, 40px) 24px 60px;
   position: relative;
@@ -363,7 +363,20 @@ body {
   text-align: left;
 }
 
-.step-icon { font-size: 32px; line-height: 1; }
+.step-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+}
+.step-icon--order    { background: #C17F3D; }
+.step-icon--delivery { background: #6B4226; }
+.step-icon--freeze   { background: #5B92C4; }
+.step-icon--bake     { background: #D84315; }
 
 .step-body {
   display: flex;
@@ -372,17 +385,19 @@ body {
 }
 
 .step-num {
-  background: var(--primary-dark);
+  background: #2C1F14;
   color: white;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .step-body strong {
@@ -451,6 +466,7 @@ body {
   object-fit: cover;
   object-position: center;
   display: block;
+  opacity: 0.18;
 }
 
 .contact-list {
