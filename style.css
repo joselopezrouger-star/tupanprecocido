@@ -118,8 +118,41 @@ body {
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  border: 3px solid rgba(61,43,31,0.18);
   text-align: left;
+}
+
+.hero-scroll-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.hero-scroll-hint:hover { opacity: 1; }
+
+.hero-scroll-label {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: rgba(61,43,31,0.8);
+  letter-spacing: 0.3px;
+}
+
+.hero-scroll-arrow {
+  font-size: 16px;
+  color: rgba(61,43,31,0.8);
+  animation: bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(4px); }
 }
 
 .hero-img {
@@ -138,19 +171,25 @@ body {
 
 .hero-card-text {
   padding: 16px 18px 18px;
+  background: #FBF0DC;
 }
 
 .hero-tagline {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--text);
-  line-height: 1.45;
+  font-family: 'Newsreader', Georgia, serif;
+  font-weight: 300;
+  font-size: 22px;
+  color: #2C1F14;
+  line-height: 1.1;
+  letter-spacing: -0.4px;
   margin-bottom: 6px;
 }
 
+.tagline-highlight {
+  color: #A2331C;
+}
+
 .hero-tagline-sub {
-  font-family: 'Lato', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 300;
   font-size: 13px;
   color: var(--text-light);
@@ -272,14 +311,14 @@ body {
   line-height: 1.2;
 }
 
-.secondary-link--how    { background: #FFF3E0; color: #BF360C; }
-.secondary-link--about  { background: var(--primary-light); color: var(--primary-dark); }
-.secondary-link--instagram { background: #FCE4EC; color: #880E4F; }
-.secondary-link--whatsapp  { background: #E8F5E9; color: #1B5E20; }
+.secondary-link--how    { background: #FFF3E0; color: #BF360C; border: 1.5px solid #FFCC80; }
+.secondary-link--about  { background: var(--primary-light); color: var(--primary-dark); border: 1.5px solid var(--border); }
+.secondary-link--instagram { background: #FCE4EC; color: #880E4F; border: 1.5px solid #F48FB1; }
+.secondary-link--whatsapp  { background: #E8F5E9; color: #1B5E20; border: 1.5px solid #A5D6A7; }
 
 /* ── How it works ── */
 .how-it-works {
-  background: var(--primary-dark);
+  background: #E5B83A;
   padding: 52px 24px;
 }
 
@@ -292,12 +331,12 @@ body {
 .how-inner h2 {
   font-size: 26px;
   font-weight: 900;
-  color: white;
+  color: #2C1F14;
   margin-bottom: 6px;
 }
 
 .how-sub {
-  color: rgba(255,255,255,0.65);
+  color: rgba(44,31,20,0.65);
   font-size: 14px;
   font-family: 'Lato', sans-serif;
   font-weight: 300;
@@ -313,8 +352,8 @@ body {
 }
 
 .step {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(44,31,20,0.1);
   border-radius: 14px;
   padding: 20px 16px;
   display: flex;
@@ -349,7 +388,7 @@ body {
 .step-body strong {
   font-size: 13px;
   font-weight: 800;
-  color: white;
+  color: #2C1F14;
   line-height: 1.2;
 }
 
@@ -357,7 +396,7 @@ body {
   font-size: 12px;
   font-family: 'Lato', sans-serif;
   font-weight: 300;
-  color: rgba(255,255,255,0.7);
+  color: rgba(44,31,20,0.7);
   line-height: 1.4;
 }
 
@@ -454,7 +493,7 @@ body {
 .overlay {
   position: fixed;
   inset: 0;
-  background: linear-gradient(145deg, #C17F3D 0%, #7A4A1E 100%);
+  background: #E5B83A;
   display: flex;
   align-items: center;
   justify-content: center;

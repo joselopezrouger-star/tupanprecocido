@@ -6,7 +6,8 @@
   <title>TUPAN Precocido</title>
   <meta name="description" content="Panes precocidos de alta calidad. Pedí por WhatsApp.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400&family=Newsreader:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="img/DSC_2887.jpg">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -36,11 +37,11 @@
 
         <div class="hero-card">
           <div class="hero-img">
-            <img src="img/salvado.png" alt="Pan TUPAN Precocido">
+            <img src="img/DSC_2887.jpg" alt="Pan TUPAN Precocido" fetchpriority="high">
           </div>
           <div class="hero-card-text">
-            <p class="hero-tagline">El pan recién horneado que siempre quisiste, sin salir de tu casa.</p>
-            <p class="hero-tagline-sub">Sin conservantes. Sin aditivos. Horneado por vos en solo 15 minutos.</p>
+            <p class="hero-tagline"><span class="tagline-highlight">El pan recién horneado</span> que siempre quisiste, sin salir de tu casa.</p>
+            <p class="hero-tagline-sub">Pedí. Congelá. Horneá. Disfrutá.</p>
           </div>
         </div>
 
@@ -51,6 +52,10 @@
           <button id="hero-wheel-btn" class="action-btn action-btn--wheel" onclick="openWheelModal()">
             ✦ <span>Descuentos</span>
           </button>
+        </div>
+        <div class="hero-scroll-hint" onclick="document.querySelector('.hero-secondary-links').scrollIntoView({behavior:'smooth'})">
+          <span class="hero-scroll-label">Cómo funciona · Quiénes somos · Instagram · WhatsApp</span>
+          <span class="hero-scroll-arrow">↓</span>
         </div>
       </div>
       <div class="hero-wave">
@@ -82,7 +87,7 @@
     <section class="how-it-works" id="how-it-works">
       <div class="how-inner">
         <h2>Así de fácil</h2>
-        <p class="how-sub">Pan recién horneado en tu casa, cuando vos querés</p>
+        <p class="how-sub">Pan recién horneado en tu casa, cuando vos querés.</p>
         <div class="steps">
           <div class="step">
             <div class="step-icon">🛒</div>
@@ -153,7 +158,7 @@
       <button class="overlay-back" onclick="closeWheelModal()">✕ Cerrar</button>
       <div class="overlay-icon">🎡</div>
       <h2>¡Tu descuento!</h2>
-      <p class="overlay-sub">Girá la ruleta y ganá un descuento exclusivo para tu pedido</p>
+      <p class="overlay-sub">Girá la ruleta y ganá un descuento exclusivo para tu pedido.</p>
       <div class="wheel-container">
         <div class="wheel-pointer">▼</div>
         <canvas id="wheel-canvas" width="300" height="300"></canvas>

@@ -1,5 +1,8 @@
 const WHEEL_ENABLED = true; // ← cambiá a false para desactivar la ruleta
 
+history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+
 let data = null;
 let selectedZone = null;
 let cart = {};
@@ -10,12 +13,12 @@ let wheelSpinning = false;
 let currentWheelRotation = 0;
 
 const WHEEL_SEGMENTS = [
+  { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
   { wheelLabel: '5%\nOFF',        label: '5% de descuento',   type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F', weight: 35 },
   { wheelLabel: '10%\nOFF',       label: '10% de descuento',  type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff', weight: 30 },
   { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
-  { wheelLabel: '20%\nOFF',       label: '20% de descuento',  type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
   { wheelLabel: '15%\nOFF',       label: '15% de descuento',  type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff', weight: 14 },
-  { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
+  { wheelLabel: '20%\nOFF',       label: '20% de descuento',  type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
 ];
 
 async function init() {
@@ -641,12 +644,58 @@ function weightedRandom() {
   return WHEEL_SEGMENTS.length - 1;
 }
 
+function playWheelSounds() {
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  const ctx = new AudioCtx();
+
+  function schedule() {
+    function tick(time) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 220;
+      osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.4, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+      osc.start(time);
+      osc.stop(time + 0.07);
+    }
+
+    for (let i = 0; i < 60; i++) {
+      const progress = i / 60;
+      const t = 6.0 * (1 - Math.pow(1 - progress, 2.5));
+      tick(ctx.currentTime + t);
+    }
+
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + 6.25 + i * 0.13;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.5, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.start(t);
+      osc.stop(t + 0.55);
+    });
+  }
+
+  ctx.resume().then(schedule);
+}
+
 function spinWheel() {
   if (wheelSpinning) return;
   wheelSpinning = true;
 
   const spinBtn = document.getElementById('spin-btn');
   spinBtn.disabled = true;
+
+  playWheelSounds();
 
   const winIndex = weightedRandom();
   const segDeg = 360 / WHEEL_SEGMENTS.length;
