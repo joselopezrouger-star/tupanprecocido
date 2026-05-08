@@ -388,7 +388,7 @@ body {
 .step-body strong {
   font-size: 13px;
   font-weight: 800;
-  color: #2C1F14;
+  color: var(--primary-dark);
   line-height: 1.2;
 }
 
@@ -396,14 +396,28 @@ body {
   font-size: 12px;
   font-family: 'Lato', sans-serif;
   font-weight: 300;
-  color: rgba(44,31,20,0.7);
+  color: rgba(139,94,42,0.85);
   line-height: 1.4;
 }
 
 /* Landing About */
 .landing-about {
+  position: relative;
+  padding: 56px 24px 48px;
+  overflow: hidden;
   background: var(--bg);
-  padding: 56px 24px 40px;
+}
+
+.landing-about-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.28;
+  z-index: 0;
+  display: block;
 }
 
 .landing-about-inner {
@@ -412,10 +426,20 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 32px;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 640px) {
   .landing-about-inner { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+.landing-about-text {
+  background: rgba(253,246,236,0.82);
+  border-radius: 16px;
+  padding: 24px 20px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .landing-about-text h2 {
@@ -435,11 +459,13 @@ body {
 }
 
 .landing-about-card {
-  background: white;
+  background: rgba(255,255,255,0.78);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .contact-list { display: flex; flex-direction: column; }
@@ -461,13 +487,8 @@ body {
 
 .contact-icon { font-size: 20px; width: 24px; text-align: center; flex-shrink: 0; }
 
-/* About photo banner */
-.about-photo-banner {
-  width: 100%;
-  max-height: 420px;
-  overflow: hidden;
-  line-height: 0;
-}
+/* About photo banner — hidden, photo is now background of landing-about */
+.about-photo-banner { display: none; }
 
 .about-photo-banner img {
   width: 100%;
