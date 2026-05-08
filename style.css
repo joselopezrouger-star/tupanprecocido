@@ -185,7 +185,6 @@ body {
 }
 
 .tagline-highlight {
-  font-style: italic;
   color: #A2331C;
 }
 
@@ -319,7 +318,7 @@ body {
 
 /* ── How it works ── */
 .how-it-works {
-  background: var(--primary-dark);
+  background: #E5B83A;
   padding: 52px 24px;
 }
 
@@ -332,12 +331,12 @@ body {
 .how-inner h2 {
   font-size: 26px;
   font-weight: 900;
-  color: white;
+  color: #2C1F14;
   margin-bottom: 6px;
 }
 
 .how-sub {
-  color: rgba(255,255,255,0.65);
+  color: rgba(44,31,20,0.65);
   font-size: 14px;
   font-family: 'Lato', sans-serif;
   font-weight: 300;
@@ -353,8 +352,8 @@ body {
 }
 
 .step {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(44,31,20,0.1);
   border-radius: 14px;
   padding: 20px 16px;
   display: flex;
@@ -389,7 +388,7 @@ body {
 .step-body strong {
   font-size: 13px;
   font-weight: 800;
-  color: white;
+  color: #2C1F14;
   line-height: 1.2;
 }
 
@@ -397,7 +396,7 @@ body {
   font-size: 12px;
   font-family: 'Lato', sans-serif;
   font-weight: 300;
-  color: rgba(255,255,255,0.7);
+  color: rgba(44,31,20,0.7);
   line-height: 1.4;
 }
 

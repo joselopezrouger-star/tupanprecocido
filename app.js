@@ -649,41 +649,43 @@ function playWheelSounds() {
   if (!AudioCtx) return;
   const ctx = new AudioCtx();
 
-  function tick(time) {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 200;
-    osc.type = 'triangle';
-    gain.gain.setValueAtTime(0.25, time);
-    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
-    osc.start(time);
-    osc.stop(time + 0.06);
+  function schedule() {
+    function tick(time) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 220;
+      osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.4, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+      osc.start(time);
+      osc.stop(time + 0.07);
+    }
+
+    for (let i = 0; i < 60; i++) {
+      const progress = i / 60;
+      const t = 6.0 * (1 - Math.pow(1 - progress, 2.5));
+      tick(ctx.currentTime + t);
+    }
+
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + 6.25 + i * 0.13;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.5, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.start(t);
+      osc.stop(t + 0.55);
+    });
   }
 
-  // 60 ticks that decelerate over 6 seconds (ease-out curve)
-  for (let i = 0; i < 60; i++) {
-    const progress = i / 60;
-    const t = 6.0 * (1 - Math.pow(1 - progress, 2.5));
-    tick(ctx.currentTime + t);
-  }
-
-  // Win chime at the end
-  [523, 659, 784, 1047].forEach((freq, i) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = freq;
-    osc.type = 'sine';
-    const t = ctx.currentTime + 6.25 + i * 0.13;
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.35, t + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-    osc.start(t);
-    osc.stop(t + 0.55);
-  });
+  ctx.resume().then(schedule);
 }
 
 function spinWheel() {
