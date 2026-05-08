@@ -119,6 +119,7 @@ body {
   overflow: hidden;
   margin-bottom: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  border: 2px solid var(--border);
   text-align: left;
 }
 
@@ -272,10 +273,10 @@ body {
   line-height: 1.2;
 }
 
-.secondary-link--how    { background: #FFF3E0; color: #BF360C; }
-.secondary-link--about  { background: var(--primary-light); color: var(--primary-dark); }
-.secondary-link--instagram { background: #FCE4EC; color: #880E4F; }
-.secondary-link--whatsapp  { background: #E8F5E9; color: #1B5E20; }
+.secondary-link--how    { background: #FFF3E0; color: #BF360C; border: 1.5px solid #FFCC80; }
+.secondary-link--about  { background: var(--primary-light); color: var(--primary-dark); border: 1.5px solid var(--border); }
+.secondary-link--instagram { background: #FCE4EC; color: #880E4F; border: 1.5px solid #F48FB1; }
+.secondary-link--whatsapp  { background: #E8F5E9; color: #1B5E20; border: 1.5px solid #A5D6A7; }
 
 /* ── How it works ── */
 .how-it-works {
