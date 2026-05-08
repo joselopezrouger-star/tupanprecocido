@@ -176,11 +176,17 @@ body {
 
 .hero-tagline {
   font-family: 'Newsreader', Georgia, serif;
-  font-weight: 700;
-  font-size: 22px;
-  color: var(--primary-dark);
-  line-height: 1.4;
+  font-weight: 500;
+  font-size: 28px;
+  color: #2C1F14;
+  line-height: 1.05;
+  letter-spacing: -0.4px;
   margin-bottom: 6px;
+}
+
+.tagline-highlight {
+  font-style: italic;
+  color: #A2331C;
 }
 
 .hero-tagline-sub {
