@@ -113,12 +113,19 @@ body {
   letter-spacing: 1px;
 }
 
+.hero-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  text-align: left;
+}
+
 .hero-img {
   width: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  margin-bottom: 16px;
   aspect-ratio: 3/2;
+  overflow: hidden;
 }
 
 .hero-img img {
@@ -129,30 +136,26 @@ body {
   display: block;
 }
 
-.hero-tagline {
-  font-family: 'Lato', sans-serif;
-  font-weight: 300;
-  font-size: 20px;
-  color: rgba(61,43,31,0.9);
-  line-height: 1.5;
-  letter-spacing: 0.1px;
-  margin-bottom: 8px;
+.hero-card-text {
+  padding: 16px 18px 18px;
 }
 
-.hero-tagline em {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 21px;
+.hero-tagline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  line-height: 1.45;
+  margin-bottom: 6px;
 }
 
 .hero-tagline-sub {
   font-family: 'Lato', sans-serif;
   font-weight: 300;
   font-size: 13px;
-  color: rgba(61,43,31,0.6);
+  color: var(--text-light);
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .hero-actions {
@@ -239,31 +242,40 @@ body {
 /* Secondary links below hero */
 .hero-secondary-links {
   background: var(--bg);
-  padding: 18px 24px;
-  display: flex;
-  flex-wrap: wrap;
+  padding: 20px 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-  justify-content: center;
-  border-bottom: 1px solid var(--border);
 }
 
 .secondary-link {
-  padding: 9px 16px;
-  border-radius: 50px;
-  border: 1.5px solid var(--border);
-  background: white;
-  color: var(--text-light);
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 14px;
+  border: none;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: border-color 0.2s, color 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 
-.secondary-link:hover { border-color: var(--primary); color: var(--primary); }
+.secondary-link:active { transform: scale(0.97); }
+
+.secondary-link-icon { font-size: 22px; line-height: 1; }
+
+.secondary-link-label {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.secondary-link--how    { background: #FFF3E0; color: #BF360C; }
+.secondary-link--about  { background: var(--primary-light); color: var(--primary-dark); }
+.secondary-link--instagram { background: #FCE4EC; color: #880E4F; }
+.secondary-link--whatsapp  { background: #E8F5E9; color: #1B5E20; }
 
 /* ── How it works ── */
 .how-it-works {
