@@ -402,6 +402,9 @@ body {
 
 /* Landing About */
 .landing-about {
+  background-image: url(img/quienes-somos.jpg);
+  background-size: cover;
+  background-position: center;
   position: relative;
   padding: 56px 24px 48px;
   overflow: hidden;
@@ -411,10 +414,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url(img/quienes-somos.jpg);
-  background-size: cover;
-  background-position: center;
-  opacity: 0.28;
+  background: rgba(253, 246, 236, 0.70);
   z-index: 0;
 }
 
