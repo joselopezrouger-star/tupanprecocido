@@ -372,7 +372,7 @@ body {
 }
 
 .step-num {
-  background: var(--primary);
+  background: var(--primary-dark);
   color: white;
   font-size: 10px;
   font-weight: 800;
@@ -402,22 +402,8 @@ body {
 
 /* Landing About */
 .landing-about {
-  position: relative;
-  padding: 56px 24px 48px;
-  overflow: hidden;
   background: var(--bg);
-}
-
-.landing-about-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0.28;
-  z-index: 0;
-  display: block;
+  padding: 56px 24px 48px;
 }
 
 .landing-about-inner {
@@ -426,20 +412,10 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 32px;
-  position: relative;
-  z-index: 1;
 }
 
 @media (min-width: 640px) {
   .landing-about-inner { grid-template-columns: 1fr 1fr; align-items: start; }
-}
-
-.landing-about-text {
-  background: rgba(253,246,236,0.82);
-  border-radius: 16px;
-  padding: 24px 20px;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .landing-about-text h2 {
@@ -459,16 +435,35 @@ body {
 }
 
 .landing-about-card {
-  background: rgba(255,255,255,0.78);
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-  border: 1px solid rgba(255,255,255,0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  border: 1px solid var(--border);
+  min-height: 200px;
 }
 
-.contact-list { display: flex; flex-direction: column; }
+.landing-about-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  background: rgba(253,246,236,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  height: 100%;
+}
 
 .contact-item {
   display: flex;
