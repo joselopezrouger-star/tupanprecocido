@@ -402,20 +402,22 @@ body {
 
 /* Landing About */
 .landing-about {
-  background-image: url(img/quienes-somos.jpg);
-  background-size: cover;
-  background-position: center;
   position: relative;
   padding: 56px 24px 48px;
   overflow: hidden;
+  background: var(--bg);
 }
 
-.landing-about::before {
-  content: '';
+.landing-about-bg {
   position: absolute;
   inset: 0;
-  background: rgba(253, 246, 236, 0.70);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.28;
   z-index: 0;
+  display: block;
 }
 
 .landing-about-inner {
