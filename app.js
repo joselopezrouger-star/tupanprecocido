@@ -14,11 +14,11 @@ let currentWheelRotation = 0;
 
 const WHEEL_SEGMENTS = [
   { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
-  { wheelLabel: '5%\nOFF',        label: '5% de descuento',   type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F', weight: 35 },
-  { wheelLabel: '10%\nOFF',       label: '10% de descuento',  type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff', weight: 30 },
+  { wheelLabel: '5%\nOFF',        label: '5% OFF',            type: 'percent', value: 5,  color: '#F5E6CC', textColor: '#3D2B1F', weight: 35 },
+  { wheelLabel: '10%\nOFF',       label: '10% OFF',           type: 'percent', value: 10, color: '#C17F3D', textColor: '#ffffff', weight: 30 },
   { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
-  { wheelLabel: '15%\nOFF',       label: '15% de descuento',  type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff', weight: 14 },
-  { wheelLabel: '20%\nOFF',       label: '20% de descuento',  type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
+  { wheelLabel: '15%\nOFF',       label: '15% OFF',           type: 'percent', value: 15, color: '#C17F3D', textColor: '#ffffff', weight: 14 },
+  { wheelLabel: '20%\nOFF',       label: '20% OFF',           type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
 ];
 
 async function init() {
@@ -350,7 +350,7 @@ function renderCartItems() {
   let discountRowHTML = '';
   if (activeDiscount?.type === 'percent' && discountAmount > 0) {
     discountRowHTML = `<div class="summary-row discount">
-      <span>Descuento ${activeDiscount.value}% (ruleta)</span>
+      <span>${activeDiscount.value}% OFF (ruleta)</span>
       <span>-${fmt(discountAmount)}</span>
     </div>`;
   } else if (activeDiscount?.type === 'shipping') {
@@ -415,7 +415,7 @@ function sendWhatsApp() {
     `*Resumen:*`,
     `Subtotal: ${fmt(subtotal)}`,
     ...(activeDiscount?.type === 'percent' && discountAmount > 0
-      ? [`Descuento (${activeDiscount.value}%): -${fmt(discountAmount)}`]
+      ? [`${activeDiscount.value}% OFF: -${fmt(discountAmount)}`]
       : []),
     ...(activeDiscount?.type === 'shipping'
       ? [`Descuento ruleta: Envio gratis`]
