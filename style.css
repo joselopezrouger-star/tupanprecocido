@@ -781,7 +781,7 @@ header {
 main {
   max-width: 960px;
   margin: 0 auto;
-  padding: 20px 16px 140px;
+  padding: 20px 16px 32px;
 }
 
 /* Zone banner */
