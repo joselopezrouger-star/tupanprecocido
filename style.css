@@ -50,12 +50,11 @@ body {
   flex-direction: column;
 }
 
-/* Logo centering wrapper — margin-bottom: auto pushes card+buttons to bottom */
+/* Logo sits at natural top; hero-card uses margin-top:auto to absorb free space */
 .hero-logo-wrap {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-bottom: auto;
 }
 
 /* Logo block (HTML recreation) */
@@ -125,6 +124,7 @@ body {
   background: white;
   border-radius: 20px;
   overflow: hidden;
+  margin-top: auto;
   margin-bottom: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   border: 3px solid rgba(61,43,31,0.18);
