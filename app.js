@@ -280,6 +280,14 @@ function openCart() {
   document.getElementById('cart-overlay-bg').classList.add('open');
   document.getElementById('floating-cart')?.classList.add('hidden');
   lockBodyScroll();
+
+  const scrollArea = document.querySelector('.cart-scroll-area');
+  const paymentSection = document.getElementById('payment-section');
+  if (scrollArea && paymentSection && paymentSection.style.display !== 'none') {
+    setTimeout(() => {
+      scrollArea.scrollTo({ top: paymentSection.offsetTop, behavior: 'smooth' });
+    }, 1000);
+  }
 }
 
 function closeCart() {
