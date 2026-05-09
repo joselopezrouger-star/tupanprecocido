@@ -415,7 +415,7 @@ body {
   padding: 12px 16px 16px;
   width: 100%;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
 }
 
@@ -500,7 +500,7 @@ body {
   object-fit: cover;
   object-position: center;
   display: block;
-  opacity: 0.3;
+  opacity: 0.15;
 }
 
 .contact-list {
