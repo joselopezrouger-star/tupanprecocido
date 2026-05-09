@@ -52,7 +52,9 @@ function renderLanding() {
   document.getElementById('landing-about-p2').textContent = b.about2;
   document.getElementById('landing-about-p3').textContent = b.about3 || '';
   document.getElementById('landing-about-p4').textContent = b.about4 || '';
-  document.getElementById('footer-text').textContent = `© ${new Date().getFullYear()} ${b.name} · Todos los derechos reservados`;
+  const footerText = `© ${new Date().getFullYear()} ${b.name} · Todos los derechos reservados`;
+  document.getElementById('footer-text').textContent = footerText;
+  document.getElementById('app-footer-text').textContent = footerText;
 
   document.getElementById('hero-instagram').href = `https://instagram.com/${b.instagram}`;
   document.getElementById('hero-whatsapp').href = `https://wa.me/${b.whatsapp}`;
