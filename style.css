@@ -673,6 +673,12 @@ header {
   transition: background 0.15s;
 }
 .header-discount-btn:hover { background: #C8E6C9; }
+.header-discount-btn--whatsapp {
+  background: #25D366;
+  color: #fff;
+  border-color: #1fbe5c;
+}
+.header-discount-btn--whatsapp:hover { background: #1fbe5c; }
 
 .btn-back {
   background: none;
