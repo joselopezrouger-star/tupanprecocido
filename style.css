@@ -45,16 +45,15 @@ body {
 .hero-content {
   max-width: 480px;
   width: 100%;
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Logo sits at natural top; hero-card uses margin-top:auto to absorb free space */
 .hero-logo-wrap {
   display: flex;
   justify-content: center;
   width: 100%;
+  margin-bottom: 20px;
 }
 
 /* Logo block (HTML recreation) */
@@ -124,7 +123,6 @@ body {
   background: white;
   border-radius: 20px;
   overflow: hidden;
-  margin-top: auto;
   margin-bottom: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   border: 3px solid rgba(61,43,31,0.18);
@@ -232,6 +230,7 @@ body {
 .action-btn--primary {
   background: #EECF9A;
   color: var(--primary-dark);
+  border: 2px solid #FBF0DC;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   font-size: 16px;
   padding: 16px 20px;
