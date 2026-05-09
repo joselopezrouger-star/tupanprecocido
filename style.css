@@ -50,14 +50,12 @@ body {
   flex-direction: column;
 }
 
-/* Logo centering wrapper — takes all free space above the hero card */
+/* Logo centering wrapper — margin-bottom: auto pushes card+buttons to bottom */
 .hero-logo-wrap {
-  flex: 1;
   display: flex;
-  align-items: flex-start;
   justify-content: center;
   width: 100%;
-  padding-bottom: 20px;
+  margin-bottom: auto;
 }
 
 /* Logo block (HTML recreation) */
@@ -232,7 +230,7 @@ body {
 .action-btn:active { transform: scale(0.97); }
 
 .action-btn--primary {
-  background: #FBF0DC;
+  background: #EECF9A;
   color: var(--primary-dark);
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   font-size: 16px;
@@ -240,7 +238,7 @@ body {
   flex: 2;
 }
 
-.action-btn--primary:hover { background: #F5E6CC; }
+.action-btn--primary:hover { background: #E5C285; }
 
 .action-btn--primary:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.28); }
 
@@ -418,6 +416,7 @@ body {
   padding: 12px 16px 16px;
   width: 100%;
   align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
