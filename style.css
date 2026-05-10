@@ -270,6 +270,13 @@ body {
 
 .action-btn--wheel:hover { background: rgba(255,255,255,0.92); box-shadow: 0 6px 20px rgba(0,0,0,0.22); }
 
+.action-btn--whatsapp {
+  background: #4a9e6b;
+  color: white;
+  border-color: #4a9e6b;
+}
+.action-btn--whatsapp:hover { background: #3d8a5b; box-shadow: 0 6px 20px rgba(74,158,107,0.35); }
+
 .hero-wave {
   position: absolute;
   bottom: -1px;
@@ -415,7 +422,7 @@ body {
   padding: 12px 16px 16px;
   width: 100%;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   text-align: center;
 }
 
