@@ -25,8 +25,8 @@
       "description": "Bella Vista y alrededores",
       "shipping": {
         "cost": 3000,
-        "freeThreshold": 16000,
-        "message": "Envío gratis a partir de $16.000"
+        "freeThreshold": 18000,
+        "message": "Envío gratis a partir de $18.000"
       }
     },
     {
@@ -47,8 +47,8 @@
       "description": "Pan francés clásico",
       "image": "img/flauton.png",
       "prices": {
-        "bellavista": 8600,
-        "cabazonanorte": 10500
+        "bellavista": 9100,
+        "cabazonanorte": 11000
       }
     },
     {
@@ -57,8 +57,8 @@
       "description": "Pan francés clásico, tamaño grande",
       "image": "img/flauton.png",
       "prices": {
-        "bellavista": 19000,
-        "cabazonanorte": 22500
+        "bellavista": 20000,
+        "cabazonanorte": 23500
       }
     },
     {
@@ -67,8 +67,8 @@
       "description": "Pancitos pequeños",
       "image": "img/mignon.jpg",
       "prices": {
-        "bellavista": 8600,
-        "cabazonanorte": 10500
+        "bellavista": 9100,
+        "cabazonanorte": 11000
       }
     },
     {
@@ -77,8 +77,8 @@
       "description": "Pan integral con salvado",
       "image": "img/salvado.png",
       "prices": {
-        "bellavista": 8600,
-        "cabazonanorte": 10500
+        "bellavista": 9100,
+        "cabazonanorte": 11000
       }
     },
     {
@@ -87,8 +87,8 @@
       "description": "Pan tradicional criollo",
       "image": "img/criollos.png",
       "prices": {
-        "bellavista": 8600,
-        "cabazonanorte": 10500
+        "bellavista": 9100,
+        "cabazonanorte": 11000
       }
     },
     {
@@ -97,8 +97,8 @@
       "description": "Pan rústico de campo",
       "image": "img/campo.png",
       "prices": {
-        "bellavista": 8600,
-        "cabazonanorte": 10500
+        "bellavista": 9100,
+        "cabazonanorte": 11000
       }
     },
     {
@@ -107,8 +107,8 @@
       "description": "Variedad de panes surtidos",
       "image": "img/mix.png",
       "prices": {
-        "bellavista": 18000,
-        "cabazonanorte": 21000
+        "bellavista": 19000,
+        "cabazonanorte": 22500
       }
     },
     {
@@ -117,8 +117,8 @@
       "description": "Pan integral individual",
       "image": "img/zeppelin.jpg",
       "prices": {
-        "bellavista": 3800,
-        "cabazonanorte": 4500
+        "bellavista": 4000,
+        "cabazonanorte": 4800
       }
     },
     {
@@ -127,8 +127,8 @@
       "description": "Baguettes pequeñas, pack de 3",
       "image": "img/mini bagg nueva fotooo.png",
       "prices": {
-        "bellavista": 3400,
-        "cabazonanorte": 4000
+        "bellavista": 3600,
+        "cabazonanorte": 4200
       }
     },
     {
