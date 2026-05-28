@@ -37,7 +37,7 @@ async function init() {
 
   if (!WHEEL_ENABLED) {
     activeDiscount = null;
-    localStorage.removeItem('tupan_disc_v2');
+    localStorage.removeItem('tupan_disc_v3');
     document.getElementById('wheel-overlay')?.classList.add('hidden');
     document.getElementById('header-discount-btn')?.classList.add('hidden');
     const heroBtn = document.getElementById('hero-wheel-btn');
@@ -539,13 +539,13 @@ function copyAlias() {
 // ══════════════════════════════
 
 function checkExistingDiscount() {
-  const saved = localStorage.getItem('tupan_disc_v2');
+  const saved = localStorage.getItem('tupan_disc_v3');
   if (!saved) return;
   try {
     activeDiscount = JSON.parse(saved);
     updateWheelFloatBtn();
   } catch(e) {
-    localStorage.removeItem('tupan_disc_v2');
+    localStorage.removeItem('tupan_disc_v3');
   }
 }
 
@@ -748,7 +748,7 @@ function showWheelResult(winIndex) {
     productId: seg.productId || null,
   };
 
-  localStorage.setItem('tupan_disc_v2', JSON.stringify(activeDiscount));
+  localStorage.setItem('tupan_disc_v3', JSON.stringify(activeDiscount));
 
   // Ocultar la ruleta para que el resultado y el botón queden visibles
   document.querySelector('.wheel-container').style.display = 'none';
