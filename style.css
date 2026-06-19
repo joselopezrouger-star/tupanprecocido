@@ -1537,3 +1537,79 @@ main {
   color: #2E7D32;
   font-weight: 700;
 }
+
+/* ══════════════════════════════
+   COUPON SECTION
+══════════════════════════════ */
+.coupon-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.coupon-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.coupon-input {
+  flex: 1;
+  font-size: 14px;
+  padding: 9px 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coupon-apply-btn {
+  padding: 9px 18px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.coupon-apply-btn:hover { background: var(--primary-dark); }
+
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #E8F5E9;
+  border: 1.5px solid #A5D6A7;
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.coupon-badge {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2E7D32;
+}
+
+.coupon-remove-btn {
+  background: none;
+  border: none;
+  color: #2E7D32;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.coupon-remove-btn:hover { background: rgba(46,125,50,0.12); }
+
+.coupon-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--red);
+  font-weight: 600;
+}
