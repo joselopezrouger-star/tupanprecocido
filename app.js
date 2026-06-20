@@ -1,4 +1,5 @@
 const WHEEL_ENABLED = false; // ← cambiá a false para desactivar la ruleta
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
 
 history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
@@ -47,6 +48,44 @@ async function init() {
       heroBtn.onclick = () => window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
     }
   }
+
+  await checkCouponParam();
+}
+
+// ══════════════════════════════
+// CUPÓN POR URL
+// ══════════════════════════════
+
+async function checkCouponParam() {
+  const cuponCode = new URLSearchParams(window.location.search).get('cupon');
+  if (!cuponCode) return;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=cupones');
+    const j = await res.json();
+    if (!j.ok) return;
+    const c = j.coupons.find(c => c.code === cuponCode.toUpperCase() && c.active);
+    if (!c) return;
+    const desc = c.type === 'percent'  ? c.value + '% OFF'
+               : c.type === 'fixed'    ? '-$' + c.value
+               : 'Envío gratis';
+    activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
+    showCouponBanner(c.code, desc);
+  } catch(e) {}
+}
+
+function showCouponBanner(code, desc) {
+  const banner = document.createElement('div');
+  banner.id = 'coupon-banner';
+  banner.style.cssText = [
+    'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:9999',
+    'background:#2B7A4B', 'color:#fff', 'text-align:center',
+    'padding:12px 16px', 'font-size:14px', 'font-weight:600',
+    'box-shadow:0 2px 8px rgba(0,0,0,.25)', 'cursor:pointer'
+  ].join(';');
+  banner.innerHTML = '✅ Cupón <strong>' + code + '</strong> aplicado: ' + desc + ' &nbsp;<span style="opacity:.7;font-size:12px">(toca para cerrar)</span>';
+  banner.onclick = () => banner.remove();
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 8000);
 }
 
 // ══════════════════════════════
@@ -365,15 +404,16 @@ function renderCartItems() {
     </div>`;
   }
 
+  const discountSource = activeDiscount?.source === 'cupon' ? 'cupón' : 'ruleta';
   let discountRowHTML = '';
   if (activeDiscount?.type === 'percent' && discountAmount > 0) {
     discountRowHTML = `<div class="summary-row discount">
-      <span>${activeDiscount.value}% OFF (ruleta)</span>
+      <span>${activeDiscount.value}% OFF (${discountSource})</span>
       <span>-${fmt(discountAmount)}</span>
     </div>`;
   } else if (activeDiscount?.type === 'shipping') {
     discountRowHTML = `<div class="summary-row discount">
-      <span>Envio gratis (ruleta)</span>
+      <span>Envio gratis (${discountSource})</span>
       <span>Gratis</span>
     </div>`;
   } else if (activeDiscount?.type === 'product') {
@@ -436,7 +476,7 @@ function sendWhatsApp() {
       ? [`${activeDiscount.value}% OFF: -${fmt(discountAmount)}`]
       : []),
     ...(activeDiscount?.type === 'shipping'
-      ? [`Descuento ruleta: Envio gratis`]
+      ? [`Descuento: Envio gratis`]
       : []),
     ...(activeDiscount?.type === 'product'
       ? [`Premio ruleta: ${activeDiscount.label}`]
@@ -622,9 +662,7 @@ function drawWheel() {
     const midAngle = startAngle + segAngle / 2;
     const textR = radius * 0.58;
 
-    // Translate to center of segment (radially)
     ctx.translate(cx + textR * Math.cos(midAngle), cy + textR * Math.sin(midAngle));
-    // Rotate so character tops face the outer rim
     ctx.rotate(midAngle + Math.PI / 2);
 
     ctx.textAlign = 'center';
@@ -701,14 +739,12 @@ function playWheelSounds() {
     }, delay);
   }
 
-  // Ticks que desaceleran a lo largo de 6 segundos
   for (let i = 0; i < 58; i++) {
     const progress = i / 58;
     const t = 6000 * (1 - Math.pow(1 - progress, 2.5));
     setTimeout(() => beep(250, 0.5, 0.055), t);
   }
 
-  // Acorde final
   [523, 659, 784, 1047].forEach((freq, i) => chime(freq, 6300 + i * 130));
 }
 
@@ -750,7 +786,6 @@ function showWheelResult(winIndex) {
 
   localStorage.setItem('tupan_disc_v3', JSON.stringify(activeDiscount));
 
-  // Ocultar la ruleta para que el resultado y el botón queden visibles
   document.querySelector('.wheel-container').style.display = 'none';
   document.querySelector('#wheel-overlay .overlay-sub').style.display = 'none';
 

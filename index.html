@@ -288,6 +288,20 @@
     <div class="cart-scroll-area">
       <div id="cart-items"></div>
 
+
+      <!-- Coupon section -->
+      <div class="coupon-section" id="coupon-section" style="display:none">
+        <div class="coupon-input-row" id="coupon-input-row">
+          <input class="form-input coupon-input" id="coupon-code" type="text" placeholder="Código de descuento" autocomplete="off" spellcheck="false">
+          <button class="coupon-apply-btn" onclick="applyCouponFromInput()">Aplicar</button>
+        </div>
+        <div class="coupon-applied" id="coupon-applied" style="display:none">
+          <span class="coupon-badge" id="coupon-badge-label"></span>
+          <button class="coupon-remove-btn" onclick="removeCoupon()">✕</button>
+        </div>
+        <div class="coupon-error" id="coupon-error" style="display:none"></div>
+      </div>
+
       <div class="payment-section" id="payment-section" style="display:none">
         <p class="payment-label">¿Cómo vas a pagar?</p>
         <div class="payment-options">
