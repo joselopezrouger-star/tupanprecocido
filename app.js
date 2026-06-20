@@ -78,12 +78,12 @@ async function fetchCoupon(code) {
 async function checkCouponParam() {
   const cuponCode = new URLSearchParams(window.location.search).get('cupon');
   if (!cuponCode) return;
-  const c = await fetchCoupon(cuponCode);
-  if (!c) return; // inválido o vencido → carga la página normal sin error
+  showZoneOverlay(); // ir a zona de inmediato, sin esperar la API
+  const c = await fetchCoupon(cuponCode); // validar en segundo plano
+  if (!c) return; // inválido o vencido → activeDiscount queda null, sin error
   const desc = getCouponDesc(c);
   activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
   showCouponBanner(c.code, desc);
-  showZoneOverlay(); // ir directo a elegir zona
 }
 
 function showCouponBanner(code, desc) {
