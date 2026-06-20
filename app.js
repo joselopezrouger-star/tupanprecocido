@@ -1,4 +1,4 @@
-const WHEEL_ENABLED = false; // ← cambiá a false para desactivar la ruleta
+const WHEEL_ENABLED = false;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
 
 history.scrollRestoration = 'manual';
@@ -53,24 +53,37 @@ async function init() {
 }
 
 // ══════════════════════════════
+// CUPÓN — helpers compartidos
+// ══════════════════════════════
+
+function getCouponDesc(c) {
+  return c.type === 'percent'  ? c.value + '% OFF'
+       : c.type === 'fixed'    ? '-$' + c.value
+       : 'Envío gratis';
+}
+
+async function fetchCoupon(code) {
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=cupones');
+    const j = await res.json();
+    if (!j.ok) return null;
+    return j.coupons.find(c => c.code === code.toUpperCase() && c.active) || null;
+  } catch(e) { return null; }
+}
+
+// ══════════════════════════════
 // CUPÓN POR URL
 // ══════════════════════════════
 
 async function checkCouponParam() {
   const cuponCode = new URLSearchParams(window.location.search).get('cupon');
   if (!cuponCode) return;
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=cupones');
-    const j = await res.json();
-    if (!j.ok) return;
-    const c = j.coupons.find(c => c.code === cuponCode.toUpperCase() && c.active);
-    if (!c) return;
-    const desc = c.type === 'percent'  ? c.value + '% OFF'
-               : c.type === 'fixed'    ? '-$' + c.value
-               : 'Envío gratis';
-    activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
-    showCouponBanner(c.code, desc);
-  } catch(e) {}
+  const c = await fetchCoupon(cuponCode);
+  if (!c) return; // inválido o vencido → carga la página normal sin error
+  const desc = getCouponDesc(c);
+  activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
+  showCouponBanner(c.code, desc);
+  showZoneOverlay(); // ir directo a elegir zona
 }
 
 function showCouponBanner(code, desc) {
@@ -86,6 +99,64 @@ function showCouponBanner(code, desc) {
   banner.onclick = () => banner.remove();
   document.body.appendChild(banner);
   setTimeout(() => banner.remove(), 8000);
+}
+
+// ══════════════════════════════
+// CUPÓN MANUAL DESDE EL CARRITO
+// ══════════════════════════════
+
+async function applyCouponFromInput() {
+  const input = document.getElementById('coupon-code');
+  const code = (input?.value || '').trim().toUpperCase();
+  const errorEl = document.getElementById('coupon-error');
+  const btn = document.querySelector('.coupon-apply-btn');
+
+  if (!code) return;
+  if (errorEl) errorEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Verificando…'; }
+
+  const c = await fetchCoupon(code);
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Aplicar'; }
+
+  if (c) {
+    const desc = getCouponDesc(c);
+    activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
+    renderCartItems();
+  } else {
+    if (errorEl) {
+      errorEl.textContent = 'Cupón inválido o vencido.';
+      errorEl.style.display = 'block';
+    }
+  }
+}
+
+function removeCoupon() {
+  activeDiscount = null;
+  const input = document.getElementById('coupon-code');
+  if (input) input.value = '';
+  renderCartItems();
+}
+
+function updateCouponUI() {
+  const section   = document.getElementById('coupon-section');
+  const inputRow  = document.getElementById('coupon-input-row');
+  const applied   = document.getElementById('coupon-applied');
+  const badgeLbl  = document.getElementById('coupon-badge-label');
+  const errorEl   = document.getElementById('coupon-error');
+  if (!section) return;
+
+  const isCoupon = activeDiscount?.source === 'cupon';
+  section.style.display = 'block';
+  if (isCoupon) {
+    if (inputRow) inputRow.style.display = 'none';
+    if (applied)  applied.style.display  = 'flex';
+    if (badgeLbl) badgeLbl.textContent   = activeDiscount.label;
+  } else {
+    if (inputRow) inputRow.style.display = 'flex';
+    if (applied)  applied.style.display  = 'none';
+  }
+  if (errorEl) errorEl.style.display = 'none';
 }
 
 // ══════════════════════════════
@@ -348,6 +419,7 @@ function renderCartItems() {
   const itemsEl = document.getElementById('cart-items');
   const summaryEl = document.getElementById('cart-summary');
   const whatsappBtn = document.getElementById('whatsapp-btn');
+  const couponSection = document.getElementById('coupon-section');
 
   const cartItems = Object.keys(cart)
     .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
@@ -361,6 +433,7 @@ function renderCartItems() {
       </div>`;
     summaryEl.innerHTML = '';
     document.getElementById('payment-section').style.display = 'none';
+    if (couponSection) couponSection.style.display = 'none';
     whatsappBtn.disabled = true;
     return;
   }
@@ -378,6 +451,8 @@ function renderCartItems() {
         <div class="cart-item-price">${fmt(price * qty)}</div>
       </div>`;
   }).join('');
+
+  updateCouponUI();
 
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
@@ -418,7 +493,7 @@ function renderCartItems() {
     </div>`;
   } else if (activeDiscount?.type === 'product') {
     discountRowHTML = `<div class="summary-row discount">
-      <span>Premio ruleta: ${activeDiscount.label} 🎁</span>
+      <span>Premio: ${activeDiscount.label} 🎁</span>
       <span>Incluido</span>
     </div>`;
   }
@@ -479,7 +554,7 @@ function sendWhatsApp() {
       ? [`Descuento: Envio gratis`]
       : []),
     ...(activeDiscount?.type === 'product'
-      ? [`Premio ruleta: ${activeDiscount.label}`]
+      ? [`Premio: ${activeDiscount.label}`]
       : []),
     `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
     `*Total: ${fmt(total)}*`,
@@ -814,6 +889,14 @@ function bindEvents() {
   document.getElementById('wheel-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeWheelModal();
   });
+
+  // Allow pressing Enter in coupon input to apply
+  const couponInput = document.getElementById('coupon-code');
+  if (couponInput) {
+    couponInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyCouponFromInput();
+    });
+  }
 }
 
 // ══════════════════════════════
