@@ -1,4 +1,5 @@
 const WHEEL_ENABLED = false; // ← cambiá a false para desactivar la ruleta
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
 
 history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
@@ -11,8 +12,6 @@ let clientType = 'habitual';
 let activeDiscount = null;
 let wheelSpinning = false;
 let currentWheelRotation = 0;
-let coupons = [];
-let activeCoupon = null;
 
 const WHEEL_SEGMENTS = [
   { wheelLabel: 'Lactal\nGRATIS', label: 'Pan Lactal GRATIS', type: 'product', value: 0,  color: '#8B5E2A', textColor: '#ffffff', weight: 8,  productId: 'lactal-integral' },
@@ -36,7 +35,6 @@ async function init() {
   renderZoneButtons();
   bindEvents();
   checkExistingDiscount();
-  fetchCoupons();
 
   if (!WHEEL_ENABLED) {
     activeDiscount = null;
@@ -50,85 +48,44 @@ async function init() {
       heroBtn.onclick = () => window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
     }
   }
+
+  await checkCouponParam();
 }
 
 // ══════════════════════════════
-// CUPONES
+// CUPÓN POR URL
 // ══════════════════════════════
 
-async function fetchCoupons() {
-  const apiUrl = data?.business?.apiUrl;
-  if (!apiUrl) return;
+async function checkCouponParam() {
+  const cuponCode = new URLSearchParams(window.location.search).get('cupon');
+  if (!cuponCode) return;
   try {
-    const res = await fetch(`${apiUrl}?action=cupones`);
-    const json = await res.json();
-    if (json.ok && Array.isArray(json.coupons)) {
-      coupons = json.coupons;
-    }
-  } catch (e) {
-    // silently fail
-  }
+    const res = await fetch(APPS_SCRIPT_URL + '?action=cupones');
+    const j = await res.json();
+    if (!j.ok) return;
+    const c = j.coupons.find(c => c.code === cuponCode.toUpperCase() && c.active);
+    if (!c) return;
+    const desc = c.type === 'percent'  ? c.value + '% OFF'
+               : c.type === 'fixed'    ? '-$' + c.value
+               : 'Envío gratis';
+    activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
+    showCouponBanner(c.code, desc);
+  } catch(e) {}
 }
 
-function applyCouponFromInput() {
-  const input = document.getElementById('coupon-code');
-  const code = (input?.value || '').trim().toUpperCase();
-  if (!code) return;
-  applyCoupon(code);
-}
-
-function applyCoupon(code) {
-  const errorEl = document.getElementById('coupon-error');
-  const now = new Date();
-
-  const coupon = coupons.find(c => c.code === code);
-  if (!coupon) {
-    errorEl.textContent = 'Código inválido';
-    errorEl.style.display = 'block';
-    return;
-  }
-  if (!coupon.active) {
-    errorEl.textContent = 'Este cupón no está activo';
-    errorEl.style.display = 'block';
-    return;
-  }
-  if (coupon.expiry) {
-    const exp = new Date(coupon.expiry + 'T23:59:59');
-    if (!isNaN(exp) && now > exp) {
-      errorEl.textContent = 'Este cupón venció';
-      errorEl.style.display = 'block';
-      return;
-    }
-  }
-
-  const cartItems = Object.keys(cart)
-    .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
-    .filter(i => i.product);
-  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
-
-  if (coupon.minOrder > 0 && subtotal < coupon.minOrder) {
-    errorEl.textContent = `Monto mínimo para este cupón: ${fmt(coupon.minOrder)}`;
-    errorEl.style.display = 'block';
-    return;
-  }
-
-  errorEl.style.display = 'none';
-  activeCoupon = coupon;
-  renderCartItems();
-}
-
-function removeCoupon() {
-  activeCoupon = null;
-  const input = document.getElementById('coupon-code');
-  if (input) input.value = '';
-  renderCartItems();
-}
-
-function buildCouponLabel(coupon) {
-  if (coupon.type === 'percent') return `🏷️ ${coupon.code} · ${coupon.value}% OFF`;
-  if (coupon.type === 'fixed') return `🏷️ ${coupon.code} · -${fmt(coupon.value)}`;
-  if (coupon.type === 'shipping') return `🏷️ ${coupon.code} · Envío gratis`;
-  return `🏷️ ${coupon.code}`;
+function showCouponBanner(code, desc) {
+  const banner = document.createElement('div');
+  banner.id = 'coupon-banner';
+  banner.style.cssText = [
+    'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:9999',
+    'background:#2B7A4B', 'color:#fff', 'text-align:center',
+    'padding:12px 16px', 'font-size:14px', 'font-weight:600',
+    'box-shadow:0 2px 8px rgba(0,0,0,.25)', 'cursor:pointer'
+  ].join(';');
+  banner.innerHTML = '✅ Cupón <strong>' + code + '</strong> aplicado: ' + desc + ' &nbsp;<span style="opacity:.7;font-size:12px">(toca para cerrar)</span>';
+  banner.onclick = () => banner.remove();
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 8000);
 }
 
 // ══════════════════════════════
@@ -391,7 +348,6 @@ function renderCartItems() {
   const itemsEl = document.getElementById('cart-items');
   const summaryEl = document.getElementById('cart-summary');
   const whatsappBtn = document.getElementById('whatsapp-btn');
-  const couponSection = document.getElementById('coupon-section');
 
   const cartItems = Object.keys(cart)
     .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
@@ -405,7 +361,6 @@ function renderCartItems() {
       </div>`;
     summaryEl.innerHTML = '';
     document.getElementById('payment-section').style.display = 'none';
-    if (couponSection) couponSection.style.display = 'none';
     whatsappBtn.disabled = true;
     return;
   }
@@ -424,29 +379,10 @@ function renderCartItems() {
       </div>`;
   }).join('');
 
-  // Show coupon section and sync its UI state
-  if (couponSection) {
-    couponSection.style.display = 'block';
-    const inputRow = document.getElementById('coupon-input-row');
-    const appliedRow = document.getElementById('coupon-applied');
-    const badgeLabel = document.getElementById('coupon-badge-label');
-    const errorEl = document.getElementById('coupon-error');
-    if (activeCoupon) {
-      if (inputRow) inputRow.style.display = 'none';
-      if (appliedRow) appliedRow.style.display = 'flex';
-      if (badgeLabel) badgeLabel.textContent = buildCouponLabel(activeCoupon);
-      if (errorEl) errorEl.style.display = 'none';
-    } else {
-      if (inputRow) inputRow.style.display = 'flex';
-      if (appliedRow) appliedRow.style.display = 'none';
-    }
-  }
-
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
 
-  // Wheel discount
   let discountAmount = 0;
   let shippingFree = false;
   if (activeDiscount?.type === 'percent') {
@@ -455,41 +391,29 @@ function renderCartItems() {
     shippingFree = true;
   }
 
-  // Coupon discount
-  let couponDiscountAmount = 0;
-  let couponShippingFree = false;
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent') {
-      couponDiscountAmount = Math.round(subtotal * activeCoupon.value / 100);
-    } else if (activeCoupon.type === 'fixed') {
-      couponDiscountAmount = Math.min(activeCoupon.value, subtotal);
-    } else if (activeCoupon.type === 'shipping') {
-      couponShippingFree = true;
-    }
-  }
-
   const originallyFreeShipping = subtotal >= freeThreshold;
-  const subtotalAfterDiscount = subtotal - discountAmount - couponDiscountAmount;
-  const shipping = (shippingFree || couponShippingFree || originallyFreeShipping || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
   const total = subtotalAfterDiscount + shipping;
   const missing = freeThreshold - subtotal;
 
   let noticeHTML = '';
-  if (shippingCost > 0 && shipping > 0 && missing > 0 && !shippingFree && !couponShippingFree) {
+  if (shippingCost > 0 && shipping > 0 && missing > 0 && !shippingFree) {
     noticeHTML = `<div class="shipping-notice">
       Agregá ${fmt(missing)} más para envío gratis
     </div>`;
   }
 
+  const discountSource = activeDiscount?.source === 'cupon' ? 'cupón' : 'ruleta';
   let discountRowHTML = '';
   if (activeDiscount?.type === 'percent' && discountAmount > 0) {
     discountRowHTML = `<div class="summary-row discount">
-      <span>${activeDiscount.value}% OFF (ruleta)</span>
+      <span>${activeDiscount.value}% OFF (${discountSource})</span>
       <span>-${fmt(discountAmount)}</span>
     </div>`;
   } else if (activeDiscount?.type === 'shipping') {
     discountRowHTML = `<div class="summary-row discount">
-      <span>Envio gratis (ruleta)</span>
+      <span>Envio gratis (${discountSource})</span>
       <span>Gratis</span>
     </div>`;
   } else if (activeDiscount?.type === 'product') {
@@ -497,26 +421,6 @@ function renderCartItems() {
       <span>Premio ruleta: ${activeDiscount.label} 🎁</span>
       <span>Incluido</span>
     </div>`;
-  }
-
-  let couponRowHTML = '';
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent' && couponDiscountAmount > 0) {
-      couponRowHTML = `<div class="summary-row discount">
-        <span>Cupón ${activeCoupon.code} (${activeCoupon.value}% OFF)</span>
-        <span>-${fmt(couponDiscountAmount)}</span>
-      </div>`;
-    } else if (activeCoupon.type === 'fixed' && couponDiscountAmount > 0) {
-      couponRowHTML = `<div class="summary-row discount">
-        <span>Cupón ${activeCoupon.code}</span>
-        <span>-${fmt(couponDiscountAmount)}</span>
-      </div>`;
-    } else if (activeCoupon.type === 'shipping') {
-      couponRowHTML = `<div class="summary-row discount">
-        <span>Cupón ${activeCoupon.code} · Envío gratis</span>
-        <span>Gratis</span>
-      </div>`;
-    }
   }
 
   document.getElementById('payment-section').style.display = 'block';
@@ -527,7 +431,6 @@ function renderCartItems() {
     ${noticeHTML}
     <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
     ${discountRowHTML}
-    ${couponRowHTML}
     <div class="summary-row">
       <span>Envio</span>
       <span>${shipping === 0 ? 'Gratis' : fmt(shipping)}</span>
@@ -549,22 +452,9 @@ function sendWhatsApp() {
   } else if (activeDiscount?.type === 'shipping') {
     shippingFree = true;
   }
-
-  let couponDiscountAmount = 0;
-  let couponShippingFree = false;
-  if (activeCoupon) {
-    if (activeCoupon.type === 'percent') {
-      couponDiscountAmount = Math.round(subtotal * activeCoupon.value / 100);
-    } else if (activeCoupon.type === 'fixed') {
-      couponDiscountAmount = Math.min(activeCoupon.value, subtotal);
-    } else if (activeCoupon.type === 'shipping') {
-      couponShippingFree = true;
-    }
-  }
-
   const originallyFreeShipping = subtotal >= selectedZone.shipping.freeThreshold;
-  const subtotalAfterDiscount = subtotal - discountAmount - couponDiscountAmount;
-  const shipping = (shippingFree || couponShippingFree || originallyFreeShipping || subtotalAfterDiscount >= selectedZone.shipping.freeThreshold) ? 0 : selectedZone.shipping.cost;
+  const subtotalAfterDiscount = subtotal - discountAmount;
+  const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= selectedZone.shipping.freeThreshold) ? 0 : selectedZone.shipping.cost;
   const total = subtotalAfterDiscount + shipping;
 
   const lines = cartItems.map(({ product, qty }) => {
@@ -586,19 +476,10 @@ function sendWhatsApp() {
       ? [`${activeDiscount.value}% OFF: -${fmt(discountAmount)}`]
       : []),
     ...(activeDiscount?.type === 'shipping'
-      ? [`Descuento ruleta: Envio gratis`]
+      ? [`Descuento: Envio gratis`]
       : []),
     ...(activeDiscount?.type === 'product'
       ? [`Premio ruleta: ${activeDiscount.label}`]
-      : []),
-    ...(activeCoupon?.type === 'percent' && couponDiscountAmount > 0
-      ? [`Cupón ${activeCoupon.code} (${activeCoupon.value}% OFF): -${fmt(couponDiscountAmount)}`]
-      : []),
-    ...(activeCoupon?.type === 'fixed' && couponDiscountAmount > 0
-      ? [`Cupón ${activeCoupon.code}: -${fmt(couponDiscountAmount)}`]
-      : []),
-    ...(activeCoupon?.type === 'shipping'
-      ? [`Cupón ${activeCoupon.code}: Envío gratis`]
       : []),
     `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
     `*Total: ${fmt(total)}*`,
@@ -933,13 +814,6 @@ function bindEvents() {
   document.getElementById('wheel-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeWheelModal();
   });
-
-  const couponInput = document.getElementById('coupon-code');
-  if (couponInput) {
-    couponInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') applyCouponFromInput();
-    });
-  }
 }
 
 // ══════════════════════════════
