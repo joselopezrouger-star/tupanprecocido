@@ -44,6 +44,18 @@
   ],
   "products": [
     {
+      "id": "combo-semanal",
+      "name": "Combo Semanal",
+      "description": "¡Combo especial de esta semana!",
+      "image": "",
+      "categoria": "Combos de la semana",
+      "hidden": true,
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
       "id": "flauton-2kg",
       "name": "Flauton x 2kg",
       "description": "Pan francés clásico",
@@ -125,7 +137,7 @@
       "name": "Zeppelin Integral x unidad",
       "description": "Pan integral individual",
       "image": "img/zeppelin.jpg",
-      "categoria": "Especiales",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4800
@@ -136,7 +148,7 @@
       "name": "Mini Baguette x 3 unidades",
       "description": "Baguettes pequeñas, pack de 3",
       "image": "img/mini bagg nueva fotooo.png",
-      "categoria": "Especiales",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 3600,
         "cabazonanorte": 4200
@@ -147,7 +159,7 @@
       "name": "Pan Lactal Blanco",
       "description": "Pan de molde blanco clásico",
       "image": "img/lactal-blanco.png",
-      "categoria": "Lactales",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
@@ -158,7 +170,7 @@
       "name": "Pan Lactal Integral con Semillas",
       "description": "Pan de molde integral con semillas",
       "image": "img/lactal-integral.png",
-      "categoria": "Lactales",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
@@ -169,7 +181,7 @@
       "name": "Pan Lactal Salvado",
       "description": "Pan de molde con salvado",
       "image": "img/lactal-salvado.png",
-      "categoria": "Lactales",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700

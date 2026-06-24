@@ -278,29 +278,37 @@ function renderZoneBanner() {
 function renderProducts() {
   const grid = document.getElementById('products-grid');
 
-  // Agrupar por categoría, preservando el orden de primera aparición
+  // Agrupar por categoría: "Combos de la semana" siempre primero, luego orden de aparición
   const categories = [];
   const byCategory = {};
   data.products.forEach(product => {
+    if (product.hidden === true) return;
     const price = product.prices[selectedZone.id];
-    if (price === undefined) return;
+    if (price === undefined || price === 0) return;
     const cat = product.categoria || 'Productos';
     if (!byCategory[cat]) { byCategory[cat] = []; categories.push(cat); }
     byCategory[cat].push(product);
   });
 
-  if (!categories.length) { grid.innerHTML = ''; return; }
+  // Combos de la semana siempre primero
+  const comboKey = 'Combos de la semana';
+  const sortedCats = [
+    ...categories.filter(c => c === comboKey),
+    ...categories.filter(c => c !== comboKey)
+  ];
 
-  // Si solo hay una categoría sin nombre significativo, no mostrar encabezado
-  const showHeaders = categories.length > 1 || (categories.length === 1 && categories[0] !== 'Productos');
+  if (!sortedCats.length) { grid.innerHTML = ''; return; }
 
-  grid.innerHTML = categories.map(cat => {
+  const showHeaders = sortedCats.length > 1 || (sortedCats.length === 1 && sortedCats[0] !== 'Productos');
+
+  grid.innerHTML = sortedCats.map(cat => {
     const products = byCategory[cat];
     const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+    const isCombo = cat === comboKey;
     const cardsHTML = products.map(product => {
       const price = product.prices[selectedZone.id];
       const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
-      return productCardHTML(product, price, salePrice);
+      return productCardHTML(product, price, salePrice, isCombo);
     }).join('');
 
     if (!showHeaders) return `<div class="cat-grid">${cardsHTML}</div>`;
@@ -329,7 +337,7 @@ function toggleCategory(catId) {
   chevron.textContent = isOpen ? '▸' : '▾';
 }
 
-function productCardHTML(product, price, salePrice) {
+function productCardHTML(product, price, salePrice, featured = false) {
   const qty = cart[product.id] || 0;
   const imgContent = product.image
     ? `<img src="${product.image}" alt="${product.name}" loading="lazy" onload="this.classList.add('img-loaded')" onerror="this.parentElement.innerHTML='🍞'">`
@@ -346,12 +354,13 @@ function productCardHTML(product, price, salePrice) {
     : `<div class="product-price">${fmt(price)}</div>`;
 
   return `
-    <div class="product-card" id="card-${product.id}" data-price="${displayPrice}">
+    <div class="product-card${featured ? ' product-card--featured' : ''}" id="card-${product.id}" data-price="${displayPrice}">
       ${hasPromo ? '<span class="promo-badge">PROMO</span>' : ''}
       <div class="product-img">${imgContent}</div>
       <div class="product-info">
         <div class="product-top">
           <div class="product-name">${product.name}</div>
+          ${product.description ? `<div class="product-desc">${product.description}</div>` : ''}
         </div>
         <div class="product-footer">
           ${priceHTML}

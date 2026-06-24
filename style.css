@@ -942,6 +942,35 @@ main {
 
 .product-img img.img-loaded { opacity: 1; }
 
+/* ── Combo semanal — tarjeta doble ancho ── */
+.product-card--featured {
+  grid-column: span 2;
+  flex-direction: row;
+  min-height: 140px;
+}
+
+.product-card--featured .product-img {
+  width: 40%;
+  min-width: 120px;
+  max-width: 200px;
+  aspect-ratio: auto;
+  flex-shrink: 0;
+  height: auto;
+}
+
+.product-card--featured .product-info {
+  flex: 1;
+}
+
+.product-card--featured .product-name {
+  font-size: 16px;
+}
+
+.product-card--featured .product-desc {
+  display: block;
+  margin-bottom: 4px;
+}
+
 .product-info {
   padding: 12px;
   display: flex;
