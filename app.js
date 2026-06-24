@@ -1,4 +1,4 @@
-const WHEEL_ENABLED = false;
+let WHEEL_ENABLED = false;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
 
 history.scrollRestoration = 'manual';
@@ -41,6 +41,8 @@ async function init() {
       return;
     }
   }
+
+  WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
 
   renderLanding();
   renderZoneButtons();
