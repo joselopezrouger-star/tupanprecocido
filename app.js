@@ -275,12 +275,56 @@ function renderZoneBanner() {
 
 function renderProducts() {
   const grid = document.getElementById('products-grid');
-  grid.innerHTML = data.products.map(product => {
+
+  // Agrupar por categoría, preservando el orden de primera aparición
+  const categories = [];
+  const byCategory = {};
+  data.products.forEach(product => {
     const price = product.prices[selectedZone.id];
-    if (price === undefined) return '';
-    const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
-    return productCardHTML(product, price, salePrice);
+    if (price === undefined) return;
+    const cat = product.categoria || 'Productos';
+    if (!byCategory[cat]) { byCategory[cat] = []; categories.push(cat); }
+    byCategory[cat].push(product);
+  });
+
+  if (!categories.length) { grid.innerHTML = ''; return; }
+
+  // Si solo hay una categoría sin nombre significativo, no mostrar encabezado
+  const showHeaders = categories.length > 1 || (categories.length === 1 && categories[0] !== 'Productos');
+
+  grid.innerHTML = categories.map(cat => {
+    const products = byCategory[cat];
+    const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+    const cardsHTML = products.map(product => {
+      const price = product.prices[selectedZone.id];
+      const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
+      return productCardHTML(product, price, salePrice);
+    }).join('');
+
+    if (!showHeaders) return `<div class="cat-grid">${cardsHTML}</div>`;
+
+    return `
+      <div class="category-section" id="${catId}">
+        <button class="category-header" onclick="toggleCategory('${catId}')" aria-expanded="true">
+          <span class="category-title">${cat}</span>
+          <span class="category-count">${products.length} ${products.length === 1 ? 'producto' : 'productos'}</span>
+          <span class="category-chevron">▾</span>
+        </button>
+        <div class="cat-grid cat-open">${cardsHTML}</div>
+      </div>`;
   }).join('');
+}
+
+function toggleCategory(catId) {
+  const section = document.getElementById(catId);
+  if (!section) return;
+  const grid = section.querySelector('.cat-grid');
+  const btn = section.querySelector('.category-header');
+  const chevron = section.querySelector('.category-chevron');
+  const isOpen = grid.classList.contains('cat-open');
+  grid.classList.toggle('cat-open', !isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  chevron.textContent = isOpen ? '▸' : '▾';
 }
 
 function productCardHTML(product, price, salePrice) {
