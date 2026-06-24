@@ -23,12 +23,23 @@ const WHEEL_SEGMENTS = [
 ];
 
 async function init() {
+  // Intentar cargar desde el dashboard (Apps Script); si falla, usar products.json local
   try {
-    const res = await fetch('products.json');
-    data = await res.json();
+    const res = await fetch(APPS_SCRIPT_URL + '?action=productos');
+    const j = await res.json();
+    if (j.ok && j.data) {
+      data = j.data;
+    } else {
+      throw new Error('sin datos');
+    }
   } catch (e) {
-    console.error('Error cargando productos:', e);
-    return;
+    try {
+      const res = await fetch('products.json');
+      data = await res.json();
+    } catch (e2) {
+      console.error('Error cargando productos:', e2);
+      return;
+    }
   }
 
   renderLanding();
