@@ -65,7 +65,15 @@ async function init() {
     const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
     const j = await res.json();
     if (j.ok && j.data) {
+      const localProducts = data.products || [];
       data = j.data;
+      // Si un producto del dashboard no tiene imagen, usamos la del products.json local
+      (data.products || []).forEach(p => {
+        if (!p.image) {
+          const local = localProducts.find(lp => lp.id === p.id);
+          if (local && local.image) p.image = local.image;
+        }
+      });
       WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
       renderLanding();
       renderZoneButtons();
