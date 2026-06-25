@@ -387,7 +387,7 @@ function toggleCategory(catId) {
 function productCardHTML(product, price, salePrice, featured = false) {
   const qty = cart[product.id] || 0;
   const imgContent = product.image
-    ? `<img src="${product.image}" alt="${product.name}" loading="lazy" onload="this.classList.add('img-loaded')" onerror="this.parentElement.innerHTML='🍞'">`
+    ? `<img src="${product.image}" alt="${product.name}" loading="lazy" onload="this.classList.add('img-loaded')" onerror="if(!this._fb){this._fb=1;var s=this.src,m=s.match(/\.(png|jpg)$/i);if(m){this.src=s.replace(m[0],m[0].toLowerCase()==='.png'?'.jpg':'.png');return;}};this.parentElement.innerHTML='🍞'">`
     : '🍞';
 
   const hasPromo = salePrice != null && salePrice < price;
