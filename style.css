@@ -831,7 +831,7 @@ main {
   align-items: center;
   gap: 10px;
   padding: 13px 16px;
-  background: white;
+  background: #7A3B1E;
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
@@ -841,18 +841,18 @@ main {
   transition: background 0.15s;
 }
 
-.category-header:hover { background: #fdf9f0; }
+.category-header:hover { background: #6A3018; }
 
 .category-title {
   font-size: 15px;
   font-weight: 800;
-  color: #7A3B1E;
+  color: #fff;
   letter-spacing: -0.2px;
 }
 
 .category-count {
   font-size: 11px;
-  color: var(--text-light);
+  color: rgba(255,255,255,0.65);
   font-weight: 500;
   margin-left: 4px;
 }
@@ -860,7 +860,7 @@ main {
 .category-chevron {
   margin-left: auto;
   font-size: 16px;
-  color: var(--primary);
+  color: rgba(255,255,255,0.8);
   transition: transform 0.2s;
   line-height: 1;
 }
