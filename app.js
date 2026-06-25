@@ -348,9 +348,32 @@ function toggleCategory(catId) {
   const btn = section.querySelector('.category-header');
   const chevron = section.querySelector('.category-chevron');
   const isOpen = grid.classList.contains('cat-open');
-  grid.classList.toggle('cat-open', !isOpen);
-  btn.setAttribute('aria-expanded', String(!isOpen));
-  chevron.textContent = isOpen ? '▸' : '▾';
+
+  if (isOpen) {
+    // Cerrar: partir de la altura real para que la animación sea proporcional
+    grid.style.maxHeight = grid.scrollHeight + 'px';
+    grid.offsetHeight; // forzar reflow
+    grid.style.maxHeight = '0';
+    grid.style.marginBottom = '0';
+    grid.classList.remove('cat-open');
+    chevron.textContent = '▸';
+    btn.setAttribute('aria-expanded', 'false');
+    setTimeout(() => { grid.style.maxHeight = ''; }, 380);
+  } else {
+    // Abrir: medir altura real y animar hasta ahí
+    grid.classList.add('cat-open');
+    const h = grid.scrollHeight;
+    grid.style.maxHeight = '0';
+    grid.offsetHeight; // forzar reflow
+    grid.style.maxHeight = h + 'px';
+    grid.style.marginBottom = '16px';
+    chevron.textContent = '▾';
+    btn.setAttribute('aria-expanded', 'true');
+    setTimeout(() => {
+      grid.style.maxHeight = '';
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 380);
+  }
 }
 
 function productCardHTML(product, price, salePrice, featured = false) {

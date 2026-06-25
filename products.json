@@ -186,6 +186,50 @@
         "bellavista": 4000,
         "cabazonanorte": 4700
       }
+    },
+    {
+      "id": "granola-1kg",
+      "name": "Granola 1kg",
+      "description": "Granola artesanal",
+      "image": "img/granola-1kg.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
+      "id": "mix-premium",
+      "name": "Mix Premium",
+      "description": "Mix selecto de frutos secos",
+      "image": "img/mix-premium.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
+      "id": "almendras",
+      "name": "Almendras",
+      "description": "Almendras seleccionadas",
+      "image": "img/almendras.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
+      "id": "nueces",
+      "name": "Nueces",
+      "description": "Nueces seleccionadas",
+      "image": "img/nueces.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
     }
   ]
 }

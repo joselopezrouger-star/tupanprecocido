@@ -846,7 +846,7 @@ main {
 .category-title {
   font-size: 15px;
   font-weight: 800;
-  color: var(--text);
+  color: #7A3B1E;
   letter-spacing: -0.2px;
 }
 
@@ -872,7 +872,7 @@ main {
   overflow: hidden;
   max-height: 0;
   margin-bottom: 0;
-  transition: max-height 0.3s ease, margin-bottom 0.3s ease;
+  transition: max-height 0.36s cubic-bezier(0.4,0,0.2,1), margin-bottom 0.36s cubic-bezier(0.4,0,0.2,1);
 }
 
 .cat-grid.cat-open {
