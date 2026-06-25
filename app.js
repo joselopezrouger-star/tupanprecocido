@@ -30,7 +30,7 @@ const WHEEL_SEGMENTS = [
 async function init() {
   // Intentar cargar desde el dashboard (Apps Script); si falla, usar products.json local
   try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=productos');
+    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
     const j = await res.json();
     if (j.ok && j.data) {
       data = j.data;
@@ -367,7 +367,7 @@ function productCardHTML(product, price, salePrice, featured = false) {
       <div class="product-info">
         <div class="product-top">
           <div class="product-name">${product.name}</div>
-          ${product.description && featured ? `<div class="product-desc">${product.description.split('\n').filter(Boolean).map(l => `<span style="display:block">· ${l}</span>`).join('')}</div>` : ''}
+          ${product.description ? `<div class="product-desc">${featured ? product.description.split('\n').filter(Boolean).map(l => `<span style="display:block">· ${l}</span>`).join('') : product.description}</div>` : ''}
         </div>
         <div class="product-footer">
           ${priceHTML}
