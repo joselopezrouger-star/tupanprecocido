@@ -1169,6 +1169,15 @@ main {
 
 .cart-item:last-child { border-bottom: none; }
 
+.combo-savings-row {
+  font-size: 12px;
+  color: var(--green-dark);
+  font-weight: 600;
+  padding: 4px 0 8px;
+  margin-top: -4px;
+  border-bottom: 1px solid var(--border);
+}
+
 .cart-item-name {
   flex: 1;
   font-size: 14px;

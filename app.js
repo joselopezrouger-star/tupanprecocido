@@ -518,6 +518,9 @@ function renderCartItems() {
 
   itemsEl.innerHTML = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
+    const isCombo = product.categoria === 'Combos de la semana';
+    const basePrice = product.prices[selectedZone.id];
+    const savings = isCombo && basePrice > price ? (basePrice - price) * qty : 0;
     return `
       <div class="cart-item">
         <div class="cart-item-name">${product.name}</div>
@@ -527,11 +530,23 @@ function renderCartItems() {
           <button class="qty-btn" onclick="changeQty('${product.id}', 1)">+</button>
         </div>
         <div class="cart-item-price">${fmt(price * qty)}</div>
-      </div>`;
+      </div>
+      ${savings > 0 ? `<div class="combo-savings-row">🎉 Ahorrás <strong>${fmt(savings)}</strong> vs precio individual</div>` : ''}`;
   }).join('');
 
   updateCouponUI();
 
+  // Subtotal display: usa precio base para combos (para mostrar el descuento)
+  const comboSavings = cartItems.reduce((s, { product, qty }) => {
+    if (product.categoria !== 'Combos de la semana') return s;
+    const base = product.prices[selectedZone.id];
+    const eff = getEffectivePrice(product);
+    return base > eff ? s + (base - eff) * qty : s;
+  }, 0);
+  const displaySubtotal = cartItems.reduce((s, { product, qty }) => {
+    const isCombo = product.categoria === 'Combos de la semana';
+    return s + (isCombo ? product.prices[selectedZone.id] : getEffectivePrice(product)) * qty;
+  }, 0);
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
@@ -580,9 +595,16 @@ function renderCartItems() {
   document.getElementById('client-section').style.display = paymentMethod ? 'block' : 'none';
   whatsappBtn.disabled = paymentMethod === null;
 
+  const comboDiscountRowHTML = comboSavings > 0 ? `
+    <div class="summary-row discount">
+      <span>💰 Descuento combo semanal</span>
+      <span>-${fmt(comboSavings)}</span>
+    </div>` : '';
+
   summaryEl.innerHTML = `
     ${noticeHTML}
-    <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+    <div class="summary-row"><span>Subtotal</span><span>${fmt(displaySubtotal)}</span></div>
+    ${comboDiscountRowHTML}
     ${discountRowHTML}
     <div class="summary-row">
       <span>Envio</span>
@@ -597,6 +619,13 @@ function sendWhatsApp() {
     .filter(item => item.product);
 
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
+  const waComboSavings = cartItems.reduce((s, { product, qty }) => {
+    if (product.categoria !== 'Combos de la semana') return s;
+    const base = product.prices[selectedZone.id];
+    const eff = getEffectivePrice(product);
+    return base > eff ? s + (base - eff) * qty : s;
+  }, 0);
+  const waDisplaySubtotal = subtotal + waComboSavings;
 
   let discountAmount = 0;
   let shippingFree = false;
@@ -624,7 +653,8 @@ function sendWhatsApp() {
     lines,
     ``,
     `*Resumen:*`,
-    `Subtotal: ${fmt(subtotal)}`,
+    `Subtotal: ${fmt(waDisplaySubtotal)}`,
+    ...(waComboSavings > 0 ? [`💰 Descuento combo semanal: -${fmt(waComboSavings)}`] : []),
     ...(activeDiscount?.type === 'percent' && discountAmount > 0
       ? [`${activeDiscount.value}% OFF: -${fmt(discountAmount)}`]
       : []),
