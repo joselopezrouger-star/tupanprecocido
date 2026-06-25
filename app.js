@@ -2,9 +2,8 @@ let WHEEL_ENABLED = false;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
 
 function heroWA() {
-  if (data && data.business) {
-    window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
-  }
+  const number = (data && data.business && data.business.whatsapp) || '541158098137';
+  window.open(`https://wa.me/${number}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
 }
 
 history.scrollRestoration = 'manual';
@@ -67,11 +66,7 @@ async function init() {
     localStorage.removeItem('tupan_disc_v3');
     document.getElementById('wheel-overlay')?.classList.add('hidden');
     document.getElementById('header-discount-btn')?.classList.add('hidden');
-    if (heroBtn) {
-      heroBtn.onclick = () => window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
-    }
   }
-  if (heroBtn) heroBtn.style.visibility = 'visible';
 
   await checkCouponParam();
 }
