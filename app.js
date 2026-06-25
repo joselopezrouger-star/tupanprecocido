@@ -27,48 +27,57 @@ const WHEEL_SEGMENTS = [
   { wheelLabel: '20%\nOFF',       label: '20% OFF',           type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
 ];
 
-async function init() {
-  // Intentar cargar desde el dashboard (Apps Script); si falla, usar products.json local
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
-    const j = await res.json();
-    if (j.ok && j.data) {
-      data = j.data;
-    } else {
-      throw new Error('sin datos');
-    }
-  } catch (e) {
-    try {
-      const res = await fetch('products.json');
-      data = await res.json();
-    } catch (e2) {
-      console.error('Error cargando productos:', e2);
-      return;
-    }
-  }
-
-  WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
-
-  renderLanding();
-  renderZoneButtons();
-  bindEvents();
-  checkExistingDiscount();
-
+function applyHeroBtn() {
   const heroBtn = document.getElementById('hero-wheel-btn');
+  if (!heroBtn) return;
   if (WHEEL_ENABLED) {
-    if (heroBtn) {
-      heroBtn.innerHTML = '✦ <span>Descuentos</span>';
-      heroBtn.className = heroBtn.className.replace('action-btn--whatsapp', 'action-btn--wheel');
-      heroBtn.onclick = () => openWheelModal();
-    }
+    heroBtn.innerHTML = '✦ <span>Descuentos</span>';
+    heroBtn.className = heroBtn.className.replace('action-btn--whatsapp', 'action-btn--wheel');
+    heroBtn.onclick = () => openWheelModal();
   } else {
     activeDiscount = null;
     localStorage.removeItem('tupan_disc_v3');
     document.getElementById('wheel-overlay')?.classList.add('hidden');
     document.getElementById('header-discount-btn')?.classList.add('hidden');
   }
+}
 
+async function init() {
+  // Fase 1: cargar products.json local (rápido) → mostrar zonas de inmediato
+  try {
+    const r = await fetch('products.json');
+    data = await r.json();
+  } catch (e) {
+    console.error('Error cargando products.json:', e);
+    return;
+  }
+
+  WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
+  renderLanding();
+  renderZoneButtons();
+  bindEvents();
+  checkExistingDiscount();
+  applyHeroBtn();
   await checkCouponParam();
+
+  // Fase 2: actualizar con datos del dashboard en segundo plano
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
+    const j = await res.json();
+    if (j.ok && j.data) {
+      data = j.data;
+      WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
+      renderLanding();
+      renderZoneButtons();
+      applyHeroBtn();
+      if (selectedZone) {
+        selectedZone = data.zones.find(z => z.id === selectedZone.id) || selectedZone;
+        renderProducts();
+      }
+    }
+  } catch (e) {
+    // products.json ya cargado, sin problema
+  }
 }
 
 // ══════════════════════════════
