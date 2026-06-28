@@ -1,5 +1,10 @@
-const WHEEL_ENABLED = false;
+let WHEEL_ENABLED = false;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
+
+function heroWA() {
+  const number = (data && data.business && data.business.whatsapp) || '541158098137';
+  window.open(`https://wa.me/${number}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
+}
 
 history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
@@ -22,34 +27,65 @@ const WHEEL_SEGMENTS = [
   { wheelLabel: '20%\nOFF',       label: '20% OFF',           type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
 ];
 
-async function init() {
-  try {
-    const res = await fetch('products.json');
-    data = await res.json();
-  } catch (e) {
-    console.error('Error cargando productos:', e);
-    return;
-  }
-
-  renderLanding();
-  renderZoneButtons();
-  bindEvents();
-  checkExistingDiscount();
-
-  if (!WHEEL_ENABLED) {
+function applyHeroBtn() {
+  const heroBtn = document.getElementById('hero-wheel-btn');
+  if (!heroBtn) return;
+  if (WHEEL_ENABLED) {
+    heroBtn.innerHTML = '✦ <span>Descuentos</span>';
+    heroBtn.className = heroBtn.className.replace('action-btn--whatsapp', 'action-btn--wheel');
+    heroBtn.onclick = () => openWheelModal();
+  } else {
     activeDiscount = null;
     localStorage.removeItem('tupan_disc_v3');
     document.getElementById('wheel-overlay')?.classList.add('hidden');
     document.getElementById('header-discount-btn')?.classList.add('hidden');
-    const heroBtn = document.getElementById('hero-wheel-btn');
-    if (heroBtn) {
-      heroBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px;margin-right:5px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.117.554 4.104 1.524 5.829L.037 23.203a.5.5 0 00.611.61l5.374-1.487A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.516-5.155-1.41l-.37-.218-3.835 1.078 1.078-3.835-.218-.37A9.959 9.959 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg><span>Hablanos</span>';
-      heroBtn.classList.add('action-btn--whatsapp');
-      heroBtn.onclick = () => window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent('Hola TUPAN! 😀')}`, '_blank');
-    }
+  }
+}
+
+async function init() {
+  // Fase 1: cargar products.json local (rápido) → mostrar zonas de inmediato
+  try {
+    const r = await fetch('products.json');
+    data = await r.json();
+  } catch (e) {
+    console.error('Error cargando products.json:', e);
+    return;
   }
 
+  WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
+  renderLanding();
+  renderZoneButtons();
+  bindEvents();
+  checkExistingDiscount();
+  applyHeroBtn();
   await checkCouponParam();
+
+  // Fase 2: actualizar con datos del dashboard en segundo plano
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
+    const j = await res.json();
+    if (j.ok && j.data) {
+      const localProducts = data.products || [];
+      data = j.data;
+      // Si un producto del dashboard no tiene imagen, usamos la del products.json local
+      (data.products || []).forEach(p => {
+        if (!p.image) {
+          const local = localProducts.find(lp => lp.id === p.id);
+          if (local && local.image) p.image = local.image;
+        }
+      });
+      WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
+      renderLanding();
+      renderZoneButtons();
+      applyHeroBtn();
+      if (selectedZone) {
+        selectedZone = data.zones.find(z => z.id === selectedZone.id) || selectedZone;
+        renderProducts();
+      }
+    }
+  } catch (e) {
+    // products.json ya cargado, sin problema
+  }
 }
 
 // ══════════════════════════════
@@ -264,18 +300,94 @@ function renderZoneBanner() {
 
 function renderProducts() {
   const grid = document.getElementById('products-grid');
-  grid.innerHTML = data.products.map(product => {
+
+  // Agrupar por categoría: "Combos de la semana" siempre primero, luego orden de aparición
+  const categories = [];
+  const byCategory = {};
+  data.products.forEach(product => {
+    if (product.hidden === true) return;
+    if (product.activeZones && product.activeZones.length > 0 && !product.activeZones.includes(selectedZone.id)) return;
     const price = product.prices[selectedZone.id];
-    if (price === undefined) return '';
-    const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
-    return productCardHTML(product, price, salePrice);
+    if (price === undefined || price === 0) return;
+    const cat = product.categoria || 'Productos';
+    if (!byCategory[cat]) { byCategory[cat] = []; categories.push(cat); }
+    byCategory[cat].push(product);
+  });
+
+  // Combos de la semana siempre primero
+  const comboKey = 'Combos de la semana';
+  const sortedCats = [
+    ...categories.filter(c => c === comboKey),
+    ...categories.filter(c => c !== comboKey)
+  ];
+
+  if (!sortedCats.length) { grid.innerHTML = ''; return; }
+
+  const showHeaders = sortedCats.length > 1 || (sortedCats.length === 1 && sortedCats[0] !== 'Productos');
+
+  grid.innerHTML = sortedCats.map(cat => {
+    const products = byCategory[cat];
+    const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
+    const isCombo = cat === comboKey;
+    const cardsHTML = products.map(product => {
+      const price = product.prices[selectedZone.id];
+      const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
+      return productCardHTML(product, price, salePrice, isCombo);
+    }).join('');
+
+    if (!showHeaders) return `<div class="cat-grid">${cardsHTML}</div>`;
+
+    return `
+      <div class="category-section" id="${catId}">
+        <button class="category-header" onclick="toggleCategory('${catId}')" aria-expanded="true">
+          <span class="category-title">${cat}</span>
+          <span class="category-count">${products.length} ${products.length === 1 ? 'producto' : 'productos'}</span>
+          <span class="category-chevron">▾</span>
+        </button>
+        <div class="cat-grid cat-open">${cardsHTML}</div>
+      </div>`;
   }).join('');
 }
 
-function productCardHTML(product, price, salePrice) {
+function toggleCategory(catId) {
+  const section = document.getElementById(catId);
+  if (!section) return;
+  const grid = section.querySelector('.cat-grid');
+  const btn = section.querySelector('.category-header');
+  const chevron = section.querySelector('.category-chevron');
+  const isOpen = grid.classList.contains('cat-open');
+
+  if (isOpen) {
+    // Cerrar: partir de la altura real para que la animación sea proporcional
+    grid.style.maxHeight = grid.scrollHeight + 'px';
+    grid.offsetHeight; // forzar reflow
+    grid.style.maxHeight = '0';
+    grid.style.marginBottom = '0';
+    grid.classList.remove('cat-open');
+    chevron.textContent = '▸';
+    btn.setAttribute('aria-expanded', 'false');
+    setTimeout(() => { grid.style.maxHeight = ''; }, 380);
+  } else {
+    // Abrir: medir altura real y animar hasta ahí
+    grid.classList.add('cat-open');
+    const h = grid.scrollHeight;
+    grid.style.maxHeight = '0';
+    grid.offsetHeight; // forzar reflow
+    grid.style.maxHeight = h + 'px';
+    grid.style.marginBottom = '16px';
+    chevron.textContent = '▾';
+    btn.setAttribute('aria-expanded', 'true');
+    setTimeout(() => {
+      grid.style.maxHeight = '';
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 380);
+  }
+}
+
+function productCardHTML(product, price, salePrice, featured = false) {
   const qty = cart[product.id] || 0;
   const imgContent = product.image
-    ? `<img src="${product.image}" alt="${product.name}" loading="lazy" onload="this.classList.add('img-loaded')" onerror="this.parentElement.innerHTML='🍞'">`
+    ? `<img src="${product.image}" alt="${product.name}" loading="lazy" onload="this.classList.add('img-loaded')" onerror="if(!this._fb){this._fb=1;var s=this.src,m=s.match(/\.(png|jpg)$/i);if(m){this.src=s.replace(m[0],m[0].toLowerCase()==='.png'?'.jpg':'.png');return;}};this.parentElement.innerHTML='🍞'">`
     : '🍞';
 
   const hasPromo = salePrice != null && salePrice < price;
@@ -289,12 +401,13 @@ function productCardHTML(product, price, salePrice) {
     : `<div class="product-price">${fmt(price)}</div>`;
 
   return `
-    <div class="product-card" id="card-${product.id}" data-price="${displayPrice}">
+    <div class="product-card${featured ? ' product-card--featured' : ''}" id="card-${product.id}" data-price="${displayPrice}">
       ${hasPromo ? '<span class="promo-badge">PROMO</span>' : ''}
       <div class="product-img">${imgContent}</div>
       <div class="product-info">
         <div class="product-top">
           <div class="product-name">${product.name}</div>
+          ${product.description ? `<div class="product-desc">${featured ? product.description.split('\n').filter(Boolean).map(l => `<span style="display:block">· ${l}</span>`).join('') : product.description}</div>` : ''}
         </div>
         <div class="product-footer">
           ${priceHTML}
@@ -440,6 +553,9 @@ function renderCartItems() {
 
   itemsEl.innerHTML = cartItems.map(({ product, qty }) => {
     const price = getEffectivePrice(product);
+    const isCombo = product.categoria === 'Combos de la semana';
+    const basePrice = product.prices[selectedZone.id];
+    const savings = isCombo && basePrice > price ? (basePrice - price) * qty : 0;
     return `
       <div class="cart-item">
         <div class="cart-item-name">${product.name}</div>
@@ -449,11 +565,23 @@ function renderCartItems() {
           <button class="qty-btn" onclick="changeQty('${product.id}', 1)">+</button>
         </div>
         <div class="cart-item-price">${fmt(price * qty)}</div>
-      </div>`;
+      </div>
+      ${savings > 0 ? `<div class="combo-savings-row">🎉 Ahorrás <strong>${fmt(savings)}</strong> vs precio individual</div>` : ''}`;
   }).join('');
 
   updateCouponUI();
 
+  // Subtotal display: usa precio base para combos (para mostrar el descuento)
+  const comboSavings = cartItems.reduce((s, { product, qty }) => {
+    if (product.categoria !== 'Combos de la semana') return s;
+    const base = product.prices[selectedZone.id];
+    const eff = getEffectivePrice(product);
+    return base > eff ? s + (base - eff) * qty : s;
+  }, 0);
+  const displaySubtotal = cartItems.reduce((s, { product, qty }) => {
+    const isCombo = product.categoria === 'Combos de la semana';
+    return s + (isCombo ? product.prices[selectedZone.id] : getEffectivePrice(product)) * qty;
+  }, 0);
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
   const freeThreshold = selectedZone.shipping.freeThreshold;
   const shippingCost = selectedZone.shipping.cost;
@@ -502,9 +630,16 @@ function renderCartItems() {
   document.getElementById('client-section').style.display = paymentMethod ? 'block' : 'none';
   whatsappBtn.disabled = paymentMethod === null;
 
+  const comboDiscountRowHTML = comboSavings > 0 ? `
+    <div class="summary-row discount">
+      <span>💰 Descuento combo semanal</span>
+      <span>-${fmt(comboSavings)}</span>
+    </div>` : '';
+
   summaryEl.innerHTML = `
     ${noticeHTML}
-    <div class="summary-row"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+    <div class="summary-row"><span>Subtotal</span><span>${fmt(displaySubtotal)}</span></div>
+    ${comboDiscountRowHTML}
     ${discountRowHTML}
     <div class="summary-row">
       <span>Envio</span>
@@ -519,6 +654,13 @@ function sendWhatsApp() {
     .filter(item => item.product);
 
   const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
+  const waComboSavings = cartItems.reduce((s, { product, qty }) => {
+    if (product.categoria !== 'Combos de la semana') return s;
+    const base = product.prices[selectedZone.id];
+    const eff = getEffectivePrice(product);
+    return base > eff ? s + (base - eff) * qty : s;
+  }, 0);
+  const waDisplaySubtotal = subtotal + waComboSavings;
 
   let discountAmount = 0;
   let shippingFree = false;
@@ -546,7 +688,8 @@ function sendWhatsApp() {
     lines,
     ``,
     `*Resumen:*`,
-    `Subtotal: ${fmt(subtotal)}`,
+    `Subtotal: ${fmt(waDisplaySubtotal)}`,
+    ...(waComboSavings > 0 ? [`💰 Descuento combo semanal: -${fmt(waComboSavings)}`] : []),
     ...(activeDiscount?.type === 'percent' && discountAmount > 0
       ? [`${activeDiscount.value}% OFF: -${fmt(discountAmount)}`]
       : []),

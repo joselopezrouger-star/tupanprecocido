@@ -9,6 +9,7 @@
     "about2": "Somos una fábrica familiar con más de 20 años haciendo pan de verdad — con tiempo, con dedicación, y con la convicción de que algo tan simple vale la pena hacerlo bien.",
     "about3": "Lo que hacemos es pan precocido de calidad, para que vos lo termines en casa. Comprás, congelás, y cuando quieras… prendés el horno y solo queda disfrutar.",
     "about4": "Sin vueltas. Sin procesos raros. Solo pan.",
+    "wheelEnabled": false,
     "bank": {
       "alias": "panprecocido",
       "cbu": "0720221888000038813636",
@@ -43,10 +44,23 @@
   ],
   "products": [
     {
+      "id": "combo-semanal",
+      "name": "Combo Semanal",
+      "description": "¡Combo especial de esta semana!",
+      "image": "",
+      "categoria": "Combos de la semana",
+      "hidden": true,
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
       "id": "flauton-2kg",
       "name": "Flauton x 2kg",
       "description": "Pan francés clásico",
       "image": "img/flauton.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 9100,
         "cabazonanorte": 11000
@@ -57,6 +71,7 @@
       "name": "Flauton x 5kg",
       "description": "Pan francés clásico, tamaño grande",
       "image": "img/flauton.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 20000,
         "cabazonanorte": 23500
@@ -67,6 +82,7 @@
       "name": "Mignon x 2kg",
       "description": "Pancitos pequeños",
       "image": "img/mignon.jpg",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 9100,
         "cabazonanorte": 11000
@@ -77,6 +93,7 @@
       "name": "Pan de Salvado x 2kg",
       "description": "Pan integral con salvado",
       "image": "img/salvado.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 9100,
         "cabazonanorte": 11000
@@ -87,6 +104,7 @@
       "name": "Criollos x 2kg",
       "description": "Pan tradicional criollo",
       "image": "img/criollos.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 9100,
         "cabazonanorte": 11000
@@ -97,6 +115,7 @@
       "name": "Pan de Campo x 2kg",
       "description": "Pan rústico de campo",
       "image": "img/campo.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 9100,
         "cabazonanorte": 11000
@@ -107,6 +126,7 @@
       "name": "MIX x 4kg",
       "description": "Variedad de panes surtidos",
       "image": "img/mix.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 19000,
         "cabazonanorte": 22500
@@ -117,6 +137,7 @@
       "name": "Zeppelin Integral x unidad",
       "description": "Pan integral individual",
       "image": "img/zeppelin.jpg",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4800
@@ -127,6 +148,7 @@
       "name": "Mini Baguette x 3 unidades",
       "description": "Baguettes pequeñas, pack de 3",
       "image": "img/mini bagg nueva fotooo.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 3600,
         "cabazonanorte": 4200
@@ -137,6 +159,7 @@
       "name": "Pan Lactal Blanco",
       "description": "Pan de molde blanco clásico",
       "image": "img/lactal-blanco.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
@@ -147,6 +170,7 @@
       "name": "Pan Lactal Integral con Semillas",
       "description": "Pan de molde integral con semillas",
       "image": "img/lactal-integral.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
@@ -157,9 +181,54 @@
       "name": "Pan Lactal Salvado",
       "description": "Pan de molde con salvado",
       "image": "img/lactal-salvado.png",
+      "categoria": "Panificados",
       "prices": {
         "bellavista": 4000,
         "cabazonanorte": 4700
+      }
+    },
+    {
+      "id": "granola-1kg",
+      "name": "Granola 1kg",
+      "description": "Granola artesanal",
+      "image": "img/granola-1kg.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
+      "id": "mix-premium",
+      "name": "Mix Premium",
+      "description": "Mix selecto de frutos secos",
+      "image": "img/mix-premium.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
+      "id": "almendras",
+      "name": "Almendras",
+      "description": "Almendras seleccionadas",
+      "image": "img/almendras.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
+      }
+    },
+    {
+      "id": "nueces",
+      "name": "Nueces",
+      "description": "Nueces seleccionadas",
+      "image": "img/nueces.jpg",
+      "categoria": "Granola y Secos",
+      "prices": {
+        "bellavista": 0,
+        "cabazonanorte": 0
       }
     }
   ]

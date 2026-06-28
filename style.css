@@ -20,7 +20,19 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+#landing, #app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#app main {
+  flex: 1;
 }
 
 .hidden { display: none !important; }
@@ -812,20 +824,80 @@ main {
 }
 
 /* ══════════════════════════════
-   PRODUCTS GRID
+   PRODUCTS GRID & CATEGORIES
 ══════════════════════════════ */
 .products-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Category section ── */
+.category-section {
+  margin-bottom: 6px;
+}
+
+.category-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  box-shadow: var(--shadow);
+  margin-bottom: 10px;
+  transition: background 0.15s;
+}
+
+.category-header:hover { background: var(--primary-dark); }
+
+.category-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.category-count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.category-chevron {
+  margin-left: auto;
+  font-size: 16px;
+  color: rgba(255,255,255,0.8);
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+.cat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
   gap: 14px;
+  overflow: hidden;
+  max-height: 0;
+  margin-bottom: 0;
+  transition: max-height 0.36s cubic-bezier(0.4,0,0.2,1), margin-bottom 0.36s cubic-bezier(0.4,0,0.2,1);
+}
+
+.cat-grid.cat-open {
+  max-height: 4000px;
+  margin-bottom: 16px;
 }
 
 @media (min-width: 540px) {
-  .products-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .cat-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
 }
 
 @media (min-width: 768px) {
-  .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+  .cat-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
 }
 
 /* ── Product card ── */
@@ -881,6 +953,35 @@ main {
 }
 
 .product-img img.img-loaded { opacity: 1; }
+
+/* ── Combo semanal — tarjeta doble ancho ── */
+.product-card--featured {
+  grid-column: span 2;
+  flex-direction: row;
+  min-height: 140px;
+}
+
+.product-card--featured .product-img {
+  width: 40%;
+  min-width: 120px;
+  max-width: 200px;
+  aspect-ratio: auto;
+  flex-shrink: 0;
+  height: auto;
+}
+
+.product-card--featured .product-info {
+  flex: 1;
+}
+
+.product-card--featured .product-name {
+  font-size: 16px;
+}
+
+.product-card--featured .product-desc {
+  display: block;
+  margin-bottom: 4px;
+}
 
 .product-info {
   padding: 12px;
@@ -1079,6 +1180,15 @@ main {
 }
 
 .cart-item:last-child { border-bottom: none; }
+
+.combo-savings-row {
+  font-size: 12px;
+  color: var(--green-dark);
+  font-weight: 600;
+  padding: 4px 0 8px;
+  margin-top: -4px;
+  border-bottom: 1px solid var(--border);
+}
 
 .cart-item-name {
   flex: 1;
