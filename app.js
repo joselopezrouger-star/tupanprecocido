@@ -60,12 +60,18 @@ async function init() {
   applyHeroBtn();
   await checkCouponParam();
 
-  // Fase 2: actualizar con datos del dashboard en segundo plano
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
-    const j = await res.json();
-    if (j.ok && j.data) {
-      const localProducts = data.products || [];
+  // Fase 2: actualizar con datos del dashboard en segundo plano.
+  // El Apps Script puede fallar de forma transitoria (cold start, red), así
+  // que reintentamos antes de resignarnos a dejar el products.json viejo.
+  const localProducts = data.products || [];
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const j = await res.json();
+      if (!j.ok || !j.data || !Array.isArray(j.data.products) || !j.data.products.length) {
+        throw new Error('respuesta del dashboard sin productos');
+      }
       data = j.data;
       // Si un producto del dashboard no tiene imagen, usamos la del products.json local
       (data.products || []).forEach(p => {
@@ -82,9 +88,14 @@ async function init() {
         selectedZone = data.zones.find(z => z.id === selectedZone.id) || selectedZone;
         renderProducts();
       }
+      break;
+    } catch (e) {
+      if (attempt === 3) {
+        console.error('No se pudo actualizar desde el dashboard tras 3 intentos, se queda con products.json local:', e);
+      } else {
+        await new Promise(r => setTimeout(r, 700 * attempt));
+      }
     }
-  } catch (e) {
-    // products.json ya cargado, sin problema
   }
 }
 
