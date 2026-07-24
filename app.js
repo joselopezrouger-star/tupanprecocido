@@ -35,8 +35,16 @@ function applyHeroBtn() {
     heroBtn.className = heroBtn.className.replace('action-btn--whatsapp', 'action-btn--wheel');
     heroBtn.onclick = () => openWheelModal();
   } else {
-    activeDiscount = null;
-    localStorage.removeItem('tupan_disc_v3');
+    // Solo limpiar un premio de ruleta viejo (sin "source", quedó de
+    // localStorage) — NO un cupón activo: esta función se vuelve a llamar
+    // después de la actualización en segundo plano de "Fase 2" en init(),
+    // y si acá se borrara cualquier activeDiscount sin condición, un cupón
+    // recién aplicado por ?cupon= (o escrito a mano en el carrito) quedaba
+    // pisado un instante después, antes de que el cliente llegue a verlo.
+    if (activeDiscount?.source !== 'cupon') {
+      activeDiscount = null;
+      localStorage.removeItem('tupan_disc_v3');
+    }
     document.getElementById('wheel-overlay')?.classList.add('hidden');
     document.getElementById('header-discount-btn')?.classList.add('hidden');
   }
@@ -131,6 +139,7 @@ async function checkCouponParam() {
   const desc = getCouponDesc(c);
   activeDiscount = { type: c.type, value: c.value, label: c.code + ' · ' + desc, source: 'cupon' };
   showCouponBanner(c.code, desc);
+  updateWheelFloatBtn(); // refleja el cupón en el botón del header ya mismo
 }
 
 function showCouponBanner(code, desc) {
