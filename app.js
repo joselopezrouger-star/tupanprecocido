@@ -35,13 +35,16 @@ function applyHeroBtn() {
     heroBtn.className = heroBtn.className.replace('action-btn--whatsapp', 'action-btn--wheel');
     heroBtn.onclick = () => openWheelModal();
   } else {
-    // Solo limpiar un premio de ruleta viejo (sin "source", quedó de
-    // localStorage) — NO un cupón activo: esta función se vuelve a llamar
-    // después de la actualización en segundo plano de "Fase 2" en init(),
-    // y si acá se borrara cualquier activeDiscount sin condición, un cupón
-    // recién aplicado por ?cupon= (o escrito a mano en el carrito) quedaba
-    // pisado un instante después, antes de que el cliente llegue a verlo.
-    if (activeDiscount?.source !== 'cupon') {
+    // Solo limpiar un premio de ruleta viejo de un formato legado (sin
+    // "source", de antes de que showWheelResult() empezara a taguearlo) —
+    // NO un cupón activo ni un premio de ruleta vigente: esta función se
+    // vuelve a llamar después de la actualización en segundo plano de
+    // "Fase 2" en init(), y si acá se borrara cualquier activeDiscount sin
+    // condición, un premio recién ganado (o un cupón recién aplicado por
+    // ?cupon=) quedaba pisado un instante después, antes de que el cliente
+    // llegue a verlo — incluso en la "Fase 1", que corre con el
+    // wheelEnabled desactualizado del products.json local.
+    if (activeDiscount?.source !== 'cupon' && activeDiscount?.source !== 'ruleta') {
       activeDiscount = null;
       localStorage.removeItem('tupan_disc_v3');
     }
@@ -1020,6 +1023,7 @@ function showWheelResult(winIndex) {
     value:     seg.value,
     label:     seg.label,
     productId: seg.productId || null,
+    source:    'ruleta',
   };
 
   localStorage.setItem('tupan_disc_v3', JSON.stringify(activeDiscount));
