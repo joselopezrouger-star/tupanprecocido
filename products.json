@@ -9,7 +9,7 @@
     "about2": "Somos una fábrica familiar con más de 20 años haciendo pan de verdad — con tiempo, con dedicación, y con la convicción de que algo tan simple vale la pena hacerlo bien.",
     "about3": "Lo que hacemos es pan precocido de calidad, para que vos lo termines en casa. Comprás, congelás, y cuando quieras… prendés el horno y solo queda disfrutar.",
     "about4": "Sin vueltas. Sin procesos raros. Solo pan.",
-    "wheelEnabled": true,
+    "wheelEnabled": false,
     "bank": {
       "alias": "panprecocido",
       "cbu": "0720221888000038813636",

@@ -27,14 +27,26 @@ const WHEEL_SEGMENTS = [
   { wheelLabel: '20%\nOFF',       label: '20% OFF',           type: 'percent', value: 20, color: '#F5E6CC', textColor: '#3D2B1F', weight: 5  },
 ];
 
+// Estado original del botón (WhatsApp) tal como está en el HTML, capturado
+// una sola vez antes de que applyHeroBtn() lo empiece a mutar — así se puede
+// restaurar tal cual cuando la ruleta se desactiva, en vez de dejarlo
+// pegado en modo "Descuentos" sin acción.
+const heroBtnEl = document.getElementById('hero-wheel-btn');
+const HERO_BTN_DEFAULT_HTML = heroBtnEl ? heroBtnEl.innerHTML : '';
+const HERO_BTN_DEFAULT_CLASS = heroBtnEl ? heroBtnEl.className : '';
+
 function applyHeroBtn() {
   const heroBtn = document.getElementById('hero-wheel-btn');
   if (!heroBtn) return;
   if (WHEEL_ENABLED) {
     heroBtn.innerHTML = '✦ <span>Descuentos</span>';
-    heroBtn.className = heroBtn.className.replace('action-btn--whatsapp', 'action-btn--wheel');
+    heroBtn.className = HERO_BTN_DEFAULT_CLASS.replace('action-btn--whatsapp', 'action-btn--wheel');
     heroBtn.onclick = () => openWheelModal();
   } else {
+    heroBtn.innerHTML = HERO_BTN_DEFAULT_HTML;
+    heroBtn.className = HERO_BTN_DEFAULT_CLASS;
+    heroBtn.onclick = () => heroWA();
+
     // Solo limpiar un premio de ruleta viejo de un formato legado (sin
     // "source", de antes de que showWheelResult() empezara a taguearlo) —
     // NO un cupón activo ni un premio de ruleta vigente: esta función se
