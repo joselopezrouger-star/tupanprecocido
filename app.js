@@ -35,7 +35,15 @@ const heroBtnEl = document.getElementById('hero-wheel-btn');
 const HERO_BTN_DEFAULT_HTML = heroBtnEl ? heroBtnEl.innerHTML : '';
 const HERO_BTN_DEFAULT_CLASS = heroBtnEl ? heroBtnEl.className : '';
 
-function applyHeroBtn() {
+// authoritative = true solo cuando WHEEL_ENABLED viene confirmado por el
+// dashboard (Fase 2 de init()). La Fase 1 usa el wheelEnabled del
+// products.json local, que puede estar desactualizado, así que con
+// authoritative=false esta función nunca borra premios ni cupones — solo
+// ajusta la UI. Así se evitan dos bugs opuestos: perder un premio recién
+// ganado por una falsa alarma de la Fase 1, y que un premio de ruleta siga
+// aplicándose en el carrito después de que el dashboard confirmó que la
+// ruleta está apagada.
+function applyHeroBtn(authoritative = false) {
   const heroBtn = document.getElementById('hero-wheel-btn');
   if (!heroBtn) return;
   if (WHEEL_ENABLED) {
@@ -47,16 +55,7 @@ function applyHeroBtn() {
     heroBtn.className = HERO_BTN_DEFAULT_CLASS;
     heroBtn.onclick = () => heroWA();
 
-    // Solo limpiar un premio de ruleta viejo de un formato legado (sin
-    // "source", de antes de que showWheelResult() empezara a taguearlo) —
-    // NO un cupón activo ni un premio de ruleta vigente: esta función se
-    // vuelve a llamar después de la actualización en segundo plano de
-    // "Fase 2" en init(), y si acá se borrara cualquier activeDiscount sin
-    // condición, un premio recién ganado (o un cupón recién aplicado por
-    // ?cupon=) quedaba pisado un instante después, antes de que el cliente
-    // llegue a verlo — incluso en la "Fase 1", que corre con el
-    // wheelEnabled desactualizado del products.json local.
-    if (activeDiscount?.source !== 'cupon' && activeDiscount?.source !== 'ruleta') {
+    if (authoritative && activeDiscount?.source !== 'cupon') {
       activeDiscount = null;
       localStorage.removeItem('tupan_disc_v3');
     }
@@ -106,7 +105,7 @@ async function init() {
       WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
       renderLanding();
       renderZoneButtons();
-      applyHeroBtn();
+      applyHeroBtn(true);
       if (selectedZone) {
         selectedZone = data.zones.find(z => z.id === selectedZone.id) || selectedZone;
         renderProducts();
