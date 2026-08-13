@@ -1,5 +1,6 @@
 let WHEEL_ENABLED = false;
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
+const DATA_CACHE_KEY = 'tupan_data_cache_v1';
 
 function heroWA() {
   const number = (data && data.business && data.business.whatsapp) || '541158098137';
@@ -65,14 +66,40 @@ function applyHeroBtn(authoritative = false) {
 }
 
 async function init() {
-  // Fase 1: cargar products.json local (rápido) → mostrar zonas de inmediato
+  // Fase 1: pintar lo más rápido posible.
+  // Preferimos el último dato que trajimos con éxito del dashboard (guardado
+  // en localStorage en la Fase 2 de una visita anterior) para el primer
+  // render, porque el products.json commiteado en el repo puede tener
+  // precios de hace días o semanas — es solo la red de contención para la
+  // primera visita desde ese navegador, o si el cache está corrupto.
+  let cachedData = null;
+  try {
+    const raw = localStorage.getItem(DATA_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.business && Array.isArray(parsed.products) && parsed.products.length) {
+        cachedData = parsed;
+      }
+    }
+  } catch (e) {
+    localStorage.removeItem(DATA_CACHE_KEY);
+  }
+
   try {
     const r = await fetch('products.json');
     data = await r.json();
   } catch (e) {
     console.error('Error cargando products.json:', e);
-    return;
+    if (!cachedData) return;
+    data = null;
   }
+
+  // localProducts (pool para completar imágenes en la Fase 2) siempre sale
+  // del products.json crudo, no del cache — así los productos nuevos que
+  // el cache todavía no vio también encuentran su imagen.
+  const localProducts = (data && data.products) || [];
+  if (cachedData) data = cachedData;
+  if (!data) return;
 
   WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
   renderLanding();
@@ -85,7 +112,6 @@ async function init() {
   // Fase 2: actualizar con datos del dashboard en segundo plano.
   // El Apps Script puede fallar de forma transitoria (cold start, red), así
   // que reintentamos antes de resignarnos a dejar el products.json viejo.
-  const localProducts = data.products || [];
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
@@ -102,6 +128,7 @@ async function init() {
           if (local && local.image) p.image = local.image;
         }
       });
+      try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
       WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
       renderLanding();
       renderZoneButtons();
