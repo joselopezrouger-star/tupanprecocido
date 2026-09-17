@@ -710,7 +710,54 @@ function renderCartItems() {
     <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>`;
 }
 
-function sendWhatsApp() {
+// Trae los precios vigentes justo antes de armar el mensaje de WhatsApp —
+// evita mandar un pedido con precios viejos si la pestaña quedó abierta un
+// rato largo, si el chequeo automático del arranque (Fase 2 de init())
+// falló, o si por lo que sea se quedó con el cache de localStorage/el
+// products.json de resguardo. Si el fetch falla (sin conexión, timeout),
+// seguimos con los últimos precios que ya teníamos: no bloqueamos la venta
+// por un problema de red puntual.
+async function actualizarPreciosAntesDeEnviar_() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now(), { signal: controller.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    if (!j.ok || !j.data || !Array.isArray(j.data.products) || !j.data.products.length) {
+      throw new Error('respuesta sin productos');
+    }
+    data = j.data;
+    try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+    if (selectedZone) selectedZone = data.zones.find(z => z.id === selectedZone.id) || selectedZone;
+    renderCartItems();
+    updateCartBtn();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function sendWhatsApp() {
+  const btn = document.getElementById('whatsapp-btn');
+  // La pestaña de WhatsApp se abre ACÁ, en el mismo instante del click, para
+  // que ningún navegador la trate como pop-up bloqueado — el fetch de acá
+  // abajo es async, y varios navegadores (sobre todo en celular) dejan de
+  // permitir window.open() apenas pasó un await desde el click. De acá en
+  // más solo navegamos esta misma pestaña ya abierta.
+  const waWindow = window.open('', '_blank');
+  const originalHTML = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = 'Verificando precios…'; }
+  try {
+    await actualizarPreciosAntesDeEnviar_();
+  } catch (e) {
+    console.error('No se pudieron actualizar los precios antes de enviar, se usan los últimos disponibles:', e);
+  } finally {
+    // no reactivar a ciegas: si el carrito quedó vacío durante la espera
+    // (renderCartItems, llamado adentro de actualizarPreciosAntesDeEnviar_,
+    // ya lo deshabilita en ese caso) no lo queremos pisar de vuelta a enabled.
+    if (btn) { btn.disabled = Object.keys(cart).length === 0; btn.innerHTML = originalHTML; }
+  }
+
   const cartItems = Object.keys(cart)
     .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
     .filter(item => item.product);
@@ -784,7 +831,9 @@ function sendWhatsApp() {
     );
   }
 
-  window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`, '_blank');
+  const waUrl = `https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`;
+  if (waWindow) waWindow.location.href = waUrl;
+  else window.open(waUrl, '_blank'); // por si el navegador igual bloqueó el open en blanco de más arriba
 }
 
 // ══════════════════════════════
