@@ -1,6 +1,62 @@
 let WHEEL_ENABLED = false;
+// Apps Script queda solo como red de contención mientras no esté migrado
+// el catálogo (ver fetchProductosFrescos_) — la fuente real ahora es
+// Supabase, mismo proyecto que usa el dashboard para todo lo demás.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxa_QOlRE-lpIqmNYqoiSjVZ9zJ2Bx0GmPFwZeTmMn2ga67EUPteMgBaDKfWUMzIBkw/exec';
 const DATA_CACHE_KEY = 'tupan_data_cache_v1';
+// Mismo proyecto de Supabase que usa el dashboard — la clave "anon" es
+// segura de tener acá: no da ningún permiso de escritura, la protección
+// la dan las políticas RLS del lado del servidor (lectura pública de
+// tienda_productos/tienda_zonas/tienda_negocio, escritura solo con login).
+const SUPABASE_URL = 'https://kicclaaxuldkzouctmog.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpY2NsYWF4dWxka3pvdWN0bW9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MTM0MTEsImV4cCI6MjA5OTE4OTQxMX0.ZOMP_kouT89OPw9SesL-NJ0TlvzNc7jpGj9HJRs7EF4';
+const SB = (typeof window !== 'undefined' && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+// Trae {business, zones, products} directo de Supabase (tienda_productos/
+// tienda_zonas/tienda_negocio) — reemplaza el fetch a Apps Script, que
+// además de más lento (arranque en frío) tenía un límite de tamaño y podía
+// devolver una página de error de Google en vez de datos.
+async function fetchProductosDeSupabase_() {
+  if (!SB) throw new Error('cliente de Supabase no disponible');
+  const [prodRes, zonaRes, negocioRes] = await Promise.all([
+    SB.from('tienda_productos').select('*').order('orden', { ascending: true }),
+    SB.from('tienda_zonas').select('*').order('orden', { ascending: true }),
+    SB.from('tienda_negocio').select('*').eq('id', 'main').maybeSingle()
+  ]);
+  if (prodRes.error) throw new Error(prodRes.error.message);
+  if (zonaRes.error) throw new Error(zonaRes.error.message);
+  if (negocioRes.error) throw new Error(negocioRes.error.message);
+  const products = (prodRes.data || []).map(p => {
+    const out = { id: p.id, name: p.name, description: p.description || '', image: p.image || '', prices: p.prices || {} };
+    if (p.categoria) out.categoria = p.categoria;
+    if (p.hidden) out.hidden = true;
+    if (p.nuevo) out.nuevo = true;
+    if (p.promo_price && Object.keys(p.promo_price).length) out.promoPrice = p.promo_price;
+    if (p.active_zones && p.active_zones.length) out.activeZones = p.active_zones;
+    return out;
+  });
+  const zones = (zonaRes.data || []).map(z => {
+    const out = {
+      id: z.id, name: z.name, description: z.description || '',
+      shipping: { cost: z.shipping_cost || 0, freeThreshold: z.shipping_free_threshold || 0, message: z.shipping_message || '' }
+    };
+    if (z.subtitle) out.subtitle = z.subtitle;
+    return out;
+  });
+  const n = negocioRes.data;
+  const business = n ? {
+    name: n.name || '', whatsapp: n.whatsapp || '', instagram: n.instagram || '', location: n.location || '',
+    about: n.about || '', about2: n.about2 || '', about3: n.about3 || '', about4: n.about4 || '',
+    bank: {
+      banco: n.bank_banco || '', alias: n.bank_alias || '', cbu: n.bank_cbu || '',
+      titular: n.bank_titular || '', cuit: n.bank_cuit || '', cuenta: n.bank_cuenta || ''
+    },
+    wheelEnabled: !!n.wheel_enabled
+  } : { bank: {} };
+  return { business, zones, products };
+}
 
 function heroWA() {
   const number = (data && data.business && data.business.whatsapp) || '541158098137';
@@ -146,7 +202,34 @@ async function init() {
 // timeout — lo comparten la Fase 2 de init() (que sí reintenta 3 veces) y
 // selectZone() (un solo intento: si falla, mejor mostrar lo que ya había
 // que dejar al cliente esperando en la pantalla de zona).
+function backfillImagenesLocales_(products, localProducts) {
+  (products || []).forEach(p => {
+    if (!p.image && localProducts) {
+      const local = localProducts.find(lp => lp.id === p.id);
+      if (local && local.image) p.image = local.image;
+    }
+  });
+}
+
 async function fetchProductosFrescos_(localProducts, timeoutMs = 8000) {
+  // Fuente principal: Supabase (mismo proyecto que usa el dashboard para
+  // todo lo demás) — rápido, sin arranque en frío ni límite de tamaño.
+  // Apps Script queda como puente único mientras el catálogo no se haya
+  // migrado ahí todavía (ver "Migrar a Supabase" en el dashboard): apenas
+  // haya productos en Supabase, este puente deja de usarse solo.
+  try {
+    const fresh = await Promise.race([
+      fetchProductosDeSupabase_(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout consultando Supabase')), timeoutMs))
+    ]);
+    if (fresh.products && fresh.products.length) {
+      backfillImagenesLocales_(fresh.products, localProducts);
+      return fresh;
+    }
+  } catch (e) {
+    console.error('No se pudo leer el catálogo de Supabase, se prueba Apps Script:', e);
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -157,13 +240,7 @@ async function fetchProductosFrescos_(localProducts, timeoutMs = 8000) {
       throw new Error('respuesta del dashboard sin productos');
     }
     const fresh = j.data;
-    // Si un producto del dashboard no tiene imagen, usamos la del products.json local
-    (fresh.products || []).forEach(p => {
-      if (!p.image && localProducts) {
-        const local = localProducts.find(lp => lp.id === p.id);
-        if (local && local.image) p.image = local.image;
-      }
-    });
+    backfillImagenesLocales_(fresh.products, localProducts);
     return fresh;
   } finally {
     clearTimeout(timer);
