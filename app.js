@@ -11,6 +11,12 @@ history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 
 let data = null;
+// true recién cuando "data" vino confirmado del dashboard (Fase 2 de init(),
+// o el fetch puntual de selectZone si el cliente elige zona antes de que esa
+// fase termine) — mientras sea false, lo que hay en "data" puede ser el
+// cache de localStorage o el products.json de resguardo, y puede estar
+// desactualizado.
+let dataFreshFromServer = false;
 let selectedZone = null;
 let cart = {};
 let paymentMethod = null;
@@ -114,20 +120,8 @@ async function init() {
   // que reintentamos antes de resignarnos a dejar el products.json viejo.
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now());
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const j = await res.json();
-      if (!j.ok || !j.data || !Array.isArray(j.data.products) || !j.data.products.length) {
-        throw new Error('respuesta del dashboard sin productos');
-      }
-      data = j.data;
-      // Si un producto del dashboard no tiene imagen, usamos la del products.json local
-      (data.products || []).forEach(p => {
-        if (!p.image) {
-          const local = localProducts.find(lp => lp.id === p.id);
-          if (local && local.image) p.image = local.image;
-        }
-      });
+      data = await fetchProductosFrescos_(localProducts);
+      dataFreshFromServer = true;
       try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
       WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
       renderLanding();
@@ -145,6 +139,34 @@ async function init() {
         await new Promise(r => setTimeout(r, 700 * attempt));
       }
     }
+  }
+}
+
+// Un único intento de traer productos/precios vigentes del dashboard, con
+// timeout — lo comparten la Fase 2 de init() (que sí reintenta 3 veces) y
+// selectZone() (un solo intento: si falla, mejor mostrar lo que ya había
+// que dejar al cliente esperando en la pantalla de zona).
+async function fetchProductosFrescos_(localProducts, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now(), { signal: controller.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    if (!j.ok || !j.data || !Array.isArray(j.data.products) || !j.data.products.length) {
+      throw new Error('respuesta del dashboard sin productos');
+    }
+    const fresh = j.data;
+    // Si un producto del dashboard no tiene imagen, usamos la del products.json local
+    (fresh.products || []).forEach(p => {
+      if (!p.image && localProducts) {
+        const local = localProducts.find(lp => lp.id === p.id);
+        if (local && local.image) p.image = local.image;
+      }
+    });
+    return fresh;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -319,7 +341,7 @@ function renderZoneButtons() {
   });
 }
 
-function selectZone(zoneId) {
+async function selectZone(zoneId) {
   selectedZone = data.zones.find(z => z.id === zoneId);
   cart = {};
   paymentMethod = null;
@@ -329,9 +351,35 @@ function selectZone(zoneId) {
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
 
-  renderProducts();
   renderZoneBanner();
   updateCartBtn();
+
+  // Si todavía no se confirmaron precios frescos del dashboard (el cliente
+  // eligió la zona muy rápido, antes de que termine la Fase 2 de init()),
+  // mostramos un cargando en vez de arriesgarnos a mostrar productos con
+  // precios viejos del cache/products.json de resguardo.
+  if (!dataFreshFromServer) {
+    showProductsLoading_();
+    try {
+      const fresh = await fetchProductosFrescos_(data.products);
+      data = fresh;
+      dataFreshFromServer = true;
+      try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+      WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
+      selectedZone = data.zones.find(z => z.id === zoneId) || selectedZone;
+      renderZoneBanner();
+      applyHeroBtn(true);
+    } catch (e) {
+      console.error('No se pudieron confirmar precios actualizados, se muestran los últimos disponibles:', e);
+    }
+  }
+
+  renderProducts();
+}
+
+function showProductsLoading_() {
+  const grid = document.getElementById('products-grid');
+  if (grid) grid.innerHTML = `<div class="loading"><div class="loading-spinner"></div>Cargando productos y precios…</div>`;
 }
 
 function showZoneOverlay() {
@@ -710,54 +758,11 @@ function renderCartItems() {
     <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>`;
 }
 
-// Trae los precios vigentes justo antes de armar el mensaje de WhatsApp —
-// evita mandar un pedido con precios viejos si la pestaña quedó abierta un
-// rato largo, si el chequeo automático del arranque (Fase 2 de init())
-// falló, o si por lo que sea se quedó con el cache de localStorage/el
-// products.json de resguardo. Si el fetch falla (sin conexión, timeout),
-// seguimos con los últimos precios que ya teníamos: no bloqueamos la venta
-// por un problema de red puntual.
-async function actualizarPreciosAntesDeEnviar_() {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=productos&t=' + Date.now(), { signal: controller.signal });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const j = await res.json();
-    if (!j.ok || !j.data || !Array.isArray(j.data.products) || !j.data.products.length) {
-      throw new Error('respuesta sin productos');
-    }
-    data = j.data;
-    try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
-    if (selectedZone) selectedZone = data.zones.find(z => z.id === selectedZone.id) || selectedZone;
-    renderCartItems();
-    updateCartBtn();
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function sendWhatsApp() {
-  const btn = document.getElementById('whatsapp-btn');
-  // La pestaña de WhatsApp se abre ACÁ, en el mismo instante del click, para
-  // que ningún navegador la trate como pop-up bloqueado — el fetch de acá
-  // abajo es async, y varios navegadores (sobre todo en celular) dejan de
-  // permitir window.open() apenas pasó un await desde el click. De acá en
-  // más solo navegamos esta misma pestaña ya abierta.
-  const waWindow = window.open('', '_blank');
-  const originalHTML = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = 'Verificando precios…'; }
-  try {
-    await actualizarPreciosAntesDeEnviar_();
-  } catch (e) {
-    console.error('No se pudieron actualizar los precios antes de enviar, se usan los últimos disponibles:', e);
-  } finally {
-    // no reactivar a ciegas: si el carrito quedó vacío durante la espera
-    // (renderCartItems, llamado adentro de actualizarPreciosAntesDeEnviar_,
-    // ya lo deshabilita en ese caso) no lo queremos pisar de vuelta a enabled.
-    if (btn) { btn.disabled = Object.keys(cart).length === 0; btn.innerHTML = originalHTML; }
-  }
-
+// La verificación de precios vigentes pasa antes, al elegir la zona (ver
+// selectZone/dataFreshFromServer) — así el pedido se arma siempre sobre
+// datos ya confirmados y acá, al confirmar el pedido, no hay que esperar
+// ningún fetch de más (eso se sentía trabado justo en el peor momento).
+function sendWhatsApp() {
   const cartItems = Object.keys(cart)
     .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
     .filter(item => item.product);
@@ -831,9 +836,7 @@ async function sendWhatsApp() {
     );
   }
 
-  const waUrl = `https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`;
-  if (waWindow) waWindow.location.href = waUrl;
-  else window.open(waUrl, '_blank'); // por si el navegador igual bloqueó el open en blanco de más arriba
+  window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`, '_blank');
 }
 
 // ══════════════════════════════
