@@ -53,8 +53,9 @@ async function fetchProductosDeSupabase_() {
       banco: n.bank_banco || '', alias: n.bank_alias || '', cbu: n.bank_cbu || '',
       titular: n.bank_titular || '', cuit: n.bank_cuit || '', cuenta: n.bank_cuenta || ''
     },
-    wheelEnabled: !!n.wheel_enabled
-  } : { bank: {} };
+    wheelEnabled: !!n.wheel_enabled,
+    categorias: n.categorias || []
+  } : { bank: {}, categorias: [] };
   return { business, zones, products };
 }
 
@@ -500,12 +501,27 @@ function renderProducts() {
     byCategory[cat].push(product);
   });
 
-  // Combos de la semana siempre primero
+  // Orden: si el dashboard configuró un orden de categorías (Tienda →
+  // Productos → 🎨 Categorías), se respeta ese; si no, se mantiene el
+  // comportamiento de siempre (Combos de la semana primero, resto en
+  // orden de aparición).
+  const catConfig = (data.business && data.business.categorias) || [];
   const comboKey = 'Combos de la semana';
-  const sortedCats = [
-    ...categories.filter(c => c === comboKey),
-    ...categories.filter(c => c !== comboKey)
-  ];
+  let sortedCats;
+  if (catConfig.length) {
+    const orderIndex = {};
+    catConfig.forEach((c, i) => { orderIndex[c.nombre] = i; });
+    sortedCats = [...categories].sort((a, b) => {
+      const ia = orderIndex.hasOwnProperty(a) ? orderIndex[a] : catConfig.length + categories.indexOf(a);
+      const ib = orderIndex.hasOwnProperty(b) ? orderIndex[b] : catConfig.length + categories.indexOf(b);
+      return ia - ib;
+    });
+  } else {
+    sortedCats = [
+      ...categories.filter(c => c === comboKey),
+      ...categories.filter(c => c !== comboKey)
+    ];
+  }
 
   if (!sortedCats.length) { grid.innerHTML = ''; return; }
 
@@ -515,6 +531,7 @@ function renderProducts() {
     const products = byCategory[cat];
     const catId = 'cat-' + cat.replace(/\s+/g, '-').toLowerCase();
     const isCombo = cat === comboKey;
+    const catColor = (catConfig.find(c => c.nombre === cat) || {}).color;
     const cardsHTML = products.map(product => {
       const price = product.prices[selectedZone.id];
       const salePrice = product.promoPrice ? product.promoPrice[selectedZone.id] : null;
@@ -525,7 +542,7 @@ function renderProducts() {
 
     return `
       <div class="category-section" id="${catId}">
-        <button class="category-header" onclick="toggleCategory('${catId}')" aria-expanded="true">
+        <button class="category-header" ${catColor ? `style="background:${catColor}"` : ''} onclick="toggleCategory('${catId}')" aria-expanded="true">
           <span class="category-title">${cat}</span>
           <span class="category-count">${products.length} ${products.length === 1 ? 'producto' : 'productos'}</span>
           <span class="category-chevron">▾</span>
