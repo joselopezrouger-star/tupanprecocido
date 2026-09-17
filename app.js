@@ -464,6 +464,7 @@ function productCardHTML(product, price, salePrice, featured = false) {
   return `
     <div class="product-card${featured ? ' product-card--featured' : ''}" id="card-${product.id}" data-price="${displayPrice}">
       ${hasPromo ? '<span class="promo-badge">PROMO</span>' : ''}
+      ${product.nuevo ? '<span class="new-badge">NUEVO</span>' : ''}
       <div class="product-img">${imgContent}</div>
       <div class="product-info">
         <div class="product-top">

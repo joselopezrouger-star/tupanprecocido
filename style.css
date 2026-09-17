@@ -933,6 +933,30 @@ main {
   box-shadow: 0 2px 6px rgba(46,125,50,0.4);
 }
 
+/* Badge "NUEVO" — esquina opuesta a la de promo para que se puedan mostrar
+   juntas sin superponerse, con un color bien distinto (azul) para que no se
+   confunda con la de promo (verde). */
+.new-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #1E88E5, #1257A0);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  z-index: 1;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(18,87,160,0.4);
+  animation: new-badge-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes new-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
 .product-img {
   width: 100%;
   aspect-ratio: 4 / 3;
