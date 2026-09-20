@@ -480,9 +480,24 @@ function goToLanding() {
 // PRODUCTS
 // ══════════════════════════════
 
+// El texto guardado en shipping.message es libre (para poder personalizarlo
+// desde el dashboard), pero mientras siga con el formato automático
+// "Envío gratis a partir de $X" (o esté vacío) se ignora y se recalcula acá
+// en vivo a partir del monto real — así el cartel nunca puede quedar
+// mostrando un monto viejo aunque alguien haya cambiado el número sin
+// volver a guardar la zona desde el dashboard (que es lo único que antes
+// refrescaba este texto).
+function shippingMessage_(zone) {
+  var msg = (zone.shipping.message || '').trim();
+  if (!msg || /^Env[ií]o gratis a partir de \$[\d.,]+$/.test(msg)) {
+    return `Envío gratis a partir de $${Number(zone.shipping.freeThreshold).toLocaleString('es-AR')}`;
+  }
+  return msg;
+}
+
 function renderZoneBanner() {
   document.getElementById('zone-banner').textContent =
-    `${selectedZone.name}  ·  ${selectedZone.shipping.message}`;
+    `${selectedZone.name}  ·  ${shippingMessage_(selectedZone)}`;
 }
 
 function renderProducts() {
