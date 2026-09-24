@@ -262,10 +262,11 @@ function getCouponDesc(c) {
 
 async function fetchCoupon(code) {
   try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=cupones');
-    const j = await res.json();
-    if (!j.ok) return null;
-    return j.coupons.find(c => c.code === code.toUpperCase() && c.active) || null;
+    if (!SB) return null;
+    const { data: c, error } = await SB.from('cupones').select('*')
+      .eq('code', code.toUpperCase()).eq('active', true).maybeSingle();
+    if (error || !c) return null;
+    return { code: c.code, type: c.type, value: c.value, description: c.description || '', minOrder: c.min_order || 0, expiry: c.expiry || '', active: c.active };
   } catch(e) { return null; }
 }
 
