@@ -54,6 +54,7 @@ async function fetchProductosDeSupabase_() {
       titular: n.bank_titular || '', cuit: n.bank_cuit || '', cuenta: n.bank_cuenta || ''
     },
     wheelEnabled: !!n.wheel_enabled,
+    wheelResetAt: n.wheel_reset_at || null,
     categorias: n.categorias || []
   } : { bank: {}, categorias: [] };
   return { business, zones, products };
@@ -181,6 +182,7 @@ async function init() {
       dataFreshFromServer = true;
       try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
       WHEEL_ENABLED = data.business && data.business.wheelEnabled === true;
+      checkWheelReset_(data.business);
       renderLanding();
       renderZoneButtons();
       applyHeroBtn(true);
@@ -1030,6 +1032,23 @@ function checkExistingDiscount() {
   }
 }
 
+// Si el dashboard desactivó la ruleta y la volvió a activar DESPUÉS de que
+// este cliente ya había ganado un premio, ese premio queda viejo — se borra
+// para que pueda volver a girar. wheelResetAt es la marca de tiempo de la
+// última reactivación (se pisa sola en el dashboard, ver
+// tienda_collectNegocio en index.html). Solo se llama con datos
+// autoritativos (Fase 2 de init()), igual que applyHeroBtn(true) — con el
+// cache viejo de la Fase 1 podría borrar un premio recién ganado por error.
+function checkWheelReset_(business) {
+  if (activeDiscount?.source !== 'ruleta' || !activeDiscount.wonAt) return;
+  const resetAt = business && business.wheelResetAt ? new Date(business.wheelResetAt).getTime() : 0;
+  if (resetAt > activeDiscount.wonAt) {
+    activeDiscount = null;
+    localStorage.removeItem('tupan_disc_v3');
+    updateWheelFloatBtn();
+  }
+}
+
 function updateWheelFloatBtn() {
   const heroBtn = document.getElementById('hero-wheel-btn');
   const headerBtn = document.getElementById('header-discount-btn');
@@ -1224,6 +1243,7 @@ function showWheelResult(winIndex) {
     label:     seg.label,
     productId: seg.productId || null,
     source:    'ruleta',
+    wonAt:     Date.now(), // para poder invalidarlo si el dashboard reactiva la ruleta después (ver checkWheelReset_)
   };
 
   localStorage.setItem('tupan_disc_v3', JSON.stringify(activeDiscount));
