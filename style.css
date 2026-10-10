@@ -1707,3 +1707,80 @@ main {
   color: var(--red);
   font-weight: 600;
 }
+
+/* ══════════════════════════════
+   TU PEDIDO — sección completa
+══════════════════════════════ */
+.pedido { padding-bottom: 90px; animation: pedidoIn .25s ease; }
+@keyframes pedidoIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.pedido-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 18px; flex-direction: column; }
+.pedido-title { font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 900; color: var(--primary-dark); line-height: 1.1; }
+.pedido-zona { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+.pedido-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.pedido-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pedido-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
+.pedido-card h2 { font-size: 17px; font-weight: 800; color: var(--text); }
+.pedido-card-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.pedido-cant { font-size: 12px; color: var(--text-light); font-weight: 600; }
+
+.pedido-item { display: grid; grid-template-columns: 56px 1fr auto; grid-template-areas: "img info total" "img ctrl total"; gap: 4px 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.pedido-item:last-child { border-bottom: none; }
+.pi-img { grid-area: img; width: 56px; height: 56px; border-radius: 10px; overflow: hidden; background: linear-gradient(135deg, var(--primary-light), #EDD5A3); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+.pi-img img { width: 100%; height: 100%; object-fit: cover; }
+.pi-info { grid-area: info; min-width: 0; }
+.pi-name { font-size: 14.5px; font-weight: 700; line-height: 1.25; }
+.pi-unit { font-size: 12px; color: var(--text-light); margin-top: 2px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.pi-tag { background: #E8F5E9; color: #2E7D32; font-weight: 800; font-size: 10.5px; padding: 2px 7px; border-radius: 20px; }
+.pi-tag--s { background: var(--primary-light); color: var(--primary-dark); }
+.pi-ahorro { font-size: 12px; color: var(--green-dark); font-weight: 600; margin-top: 3px; }
+.pedido-item .cart-item-controls { grid-area: ctrl; justify-self: start; }
+.pi-total { grid-area: total; text-align: right; font-size: 15px; font-weight: 800; color: var(--primary-dark); display: flex; flex-direction: column; align-items: flex-end; }
+.pi-tachado { font-size: 12px; font-weight: 600; color: var(--text-light); text-decoration: line-through; }
+.pedido-mas { margin-top: 12px; width: 100%; padding: 11px; background: none; border: 1.5px dashed var(--primary); border-radius: 10px; color: var(--primary-dark); font-size: 14px; font-weight: 700; cursor: pointer; transition: background .15s; }
+.pedido-mas:hover { background: var(--primary-light); }
+
+/* sugerencias para sumar */
+.incentivo { background: linear-gradient(160deg, #FFF8EC 0%, #FFFFFF 70%); border-color: #E9C98F; }
+.incentivo-head p { font-size: 13px; color: var(--text-light); margin-top: 3px; }
+.incentivo-lista { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 12px; overflow-x: auto; padding: 14px 2px 4px; scroll-snap-type: x mandatory; }
+.inc-card { position: relative; background: white; border: 1px solid var(--border); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px; scroll-snap-align: start; box-shadow: 0 1px 6px rgba(0,0,0,.05); }
+.inc-off { position: absolute; top: 8px; left: 8px; z-index: 1; background: linear-gradient(135deg, #43A047, #2E7D32); color: white; font-size: 12px; font-weight: 900; padding: 3px 8px; border-radius: 20px; box-shadow: 0 2px 6px rgba(46,125,50,.35); }
+.inc-img { aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: linear-gradient(135deg, var(--primary-light), #EDD5A3); display: flex; align-items: center; justify-content: center; font-size: 34px; }
+.inc-img img { width: 100%; height: 100%; object-fit: cover; }
+.inc-name { font-size: 13px; font-weight: 700; line-height: 1.25; min-height: 32px; }
+.inc-precio { display: flex; align-items: baseline; gap: 6px; font-size: 16px; color: var(--primary-dark); }
+.inc-tachado { font-size: 12px; color: var(--text-light); text-decoration: line-through; }
+.inc-uds { font-size: 11px; color: var(--text-light); margin-top: -4px; }
+.inc-btn { margin-top: auto; padding: 9px; border: none; border-radius: 9px; background: var(--primary); color: white; font-size: 13.5px; font-weight: 800; cursor: pointer; transition: background .15s, transform .1s; }
+.inc-btn:hover { background: var(--primary-dark); }
+.inc-btn:active { transform: scale(.97); }
+
+#pedido-pago-card .coupon-section { margin: 0 0 14px; }
+#pedido-pago-card .payment-section { margin-top: 0; padding-top: 0; border-top: none; }
+#pedido-pago-card .client-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+.pedido-resumen .summary-row.total { font-size: 22px; }
+.pedido-resumen h2 { margin-bottom: 8px; }
+.pedido-nota { font-size: 12px; color: var(--text-light); text-align: center; margin-top: 10px; }
+
+/* barra fija del celular */
+.pedido-barra { position: fixed; left: 0; right: 0; bottom: 0; z-index: 140; background: white; border-top: 1px solid var(--border); box-shadow: 0 -6px 24px rgba(0,0,0,.10); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pedido-barra .pb-l { display: block; font-size: 11px; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.pedido-barra .pb-v { font-size: 20px; font-weight: 900; color: var(--text); }
+.pb-btn { flex: 1; max-width: 240px; padding: 13px 16px; border: none; border-radius: 12px; background: var(--primary); color: white; font-size: 15px; font-weight: 800; cursor: pointer; }
+.pb-btn--wa { background: var(--green); }
+.pb-btn:disabled { background: #ccc; }
+.pedido.hidden ~ .pedido-barra { display: none; }
+
+@media (min-width: 860px) {
+  .pedido { padding-bottom: 40px; }
+  .pedido-top { flex-direction: row; align-items: center; gap: 16px; }
+  .pedido-title { font-size: 34px; }
+  .pedido-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; }
+  .pedido-side { position: sticky; top: 76px; }
+  .pedido-barra { display: none; }
+  .pedido-item { grid-template-columns: 64px 1fr auto 110px; grid-template-areas: "img info ctrl total"; }
+  .pi-img { width: 64px; height: 64px; }
+  .pedido-item .cart-item-controls { justify-self: center; }
+  .incentivo-lista { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); overflow: visible; }
+}
