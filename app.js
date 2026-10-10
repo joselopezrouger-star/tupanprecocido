@@ -801,6 +801,7 @@ function openCart(desdeHistorial) {
   document.getElementById('products-section').classList.add('hidden');
   document.getElementById('pedido-section').classList.remove('hidden');
   document.getElementById('floating-cart')?.classList.add('hidden');
+  document.getElementById('back-to-landing-btn').textContent = '← Atrás';
   document.getElementById('pedido-zona').textContent = `${selectedZone.name} · ${shippingMessage_(selectedZone)}`;
   renderCartItems();
   window.scrollTo(0, 0);
@@ -812,6 +813,7 @@ function closeCart(desdeHistorial) {
   pedidoAbierto = false;
   document.getElementById('pedido-section').classList.add('hidden');
   document.getElementById('products-section').classList.remove('hidden');
+  document.getElementById('back-to-landing-btn').textContent = '← Inicio';
   renderProducts();
   updateCartBtn();
   window.scrollTo(0, scrollProductos);
@@ -1322,9 +1324,9 @@ function bindEvents() {
   document.getElementById('overlay-back-btn').addEventListener('click', () => {
     document.getElementById('zone-overlay').classList.add('hidden');
   });
-  document.getElementById('back-to-landing-btn').addEventListener('click', goToLanding);
+  // en "Tu pedido" el botón de arriba a la izquierda es "Atrás" (vuelve a los productos); en el catálogo, "Inicio"
+  document.getElementById('back-to-landing-btn').addEventListener('click', () => pedidoAbierto ? closeCart() : goToLanding());
   document.getElementById('cart-btn').addEventListener('click', () => openCart());
-  document.getElementById('close-cart-btn').addEventListener('click', () => closeCart());
   document.getElementById('whatsapp-btn').addEventListener('click', sendWhatsApp);
   document.getElementById('wheel-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeWheelModal();
