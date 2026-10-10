@@ -55,7 +55,8 @@ async function fetchProductosDeSupabase_() {
     },
     wheelEnabled: !!n.wheel_enabled,
     wheelResetAt: n.wheel_reset_at || null,
-    categorias: n.categorias || []
+    categorias: n.categorias || [],
+    incentivos: n.incentivos && Object.keys(n.incentivos).length ? n.incentivos : null
   } : { bank: {}, categorias: [] };
   return { business, zones, products };
 }
@@ -425,6 +426,7 @@ function renderZoneButtons() {
 async function selectZone(zoneId) {
   selectedZone = data.zones.find(z => z.id === zoneId);
   cart = {};
+  incentivoIds = {};
   paymentMethod = null;
   clientType = 'habitual';
 
@@ -468,6 +470,8 @@ function showZoneOverlay() {
 }
 
 function goToLanding() {
+  if (pedidoAbierto) closeCart(true);
+  incentivoIds = {};
   document.getElementById('app').classList.add('hidden');
   document.getElementById('zone-overlay').classList.add('hidden');
   document.getElementById('landing').classList.remove('hidden');
@@ -668,9 +672,8 @@ function changeQty(productId, delta) {
   if (cart[productId] <= 0) delete cart[productId];
   refreshActions(productId);
   updateCartBtn();
-  if (document.getElementById('cart-panel').classList.contains('open')) {
-    renderCartItems();
-  }
+  if (cart[productId] === undefined) delete incentivoIds[productId];
+  if (pedidoAbierto) renderCartItems();
 }
 
 function refreshActions(productId) {
@@ -694,13 +697,10 @@ function updateFloatingCart(totalItems) {
     bar.classList.add('hidden');
     return;
   }
-  const cartItems = Object.keys(cart)
-    .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
-    .filter(i => i.product);
-  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
+  const T = calcPedido();
   document.getElementById('floating-cart-label').textContent =
-    `Ver pedido · ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} · ${fmt(subtotal)}`;
-  bar.classList.remove('hidden');
+    `Ver pedido · ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} · ${fmt(T.neto)}`;
+  bar.classList.toggle('hidden', pedidoAbierto);
 }
 
 function getEffectivePrice(product) {
@@ -727,27 +727,105 @@ function unlockBodyScroll() {
   window.scrollTo(0, scrollY);
 }
 
-function openCart() {
-  renderCartItems();
-  document.getElementById('cart-panel').classList.add('open');
-  document.getElementById('cart-overlay-bg').classList.add('open');
-  document.getElementById('floating-cart')?.classList.add('hidden');
-  lockBodyScroll();
+// ══════════════════════════════
+// TU PEDIDO — sección completa (antes era un panel que se deslizaba)
+// ══════════════════════════════
 
-  const scrollArea = document.querySelector('.cart-scroll-area');
-  const paymentSection = document.getElementById('payment-section');
-  if (scrollArea && paymentSection && paymentSection.style.display !== 'none') {
-    setTimeout(() => {
-      scrollArea.scrollTo({ top: paymentSection.offsetTop, behavior: 'smooth' });
-    }, 1000);
-  }
+// ── Incentivos: sugerencias para sumar productos, con o sin descuento ──
+// Se configuran desde el dashboard (Tienda → Incentivos) y llegan en
+// data.business.incentivos = {activo, titulo, subtitulo, productos:[{id,
+// descuento}], maxSugeridos, topeTicket, minTicket, unidades, topeDescuento,
+// zonas}. El descuento vale solo para lo que se suma DESDE la sugerencia
+// (incentivoIds), hasta "unidades" por producto, y nunca para productos
+// que el cliente ya había elegido por su cuenta.
+let incentivoIds = {};
+function incCfg() {
+  const c = data && data.business && data.business.incentivos;
+  if (!c || !c.activo || !selectedZone) return null;
+  if (c.zonas && c.zonas.length && !c.zonas.includes(selectedZone.id)) return null;
+  return c;
+}
+function incItem(c, id) { return (c.productos || []).find(p => p.id === id); }
+function productoDisponible(p) {
+  if (!p || p.hidden) return false;
+  if (p.activeZones && p.activeZones.length && !p.activeZones.includes(selectedZone.id)) return false;
+  const price = p.prices[selectedZone.id];
+  return price !== undefined && price > 0;
 }
 
-function closeCart() {
-  document.getElementById('cart-panel').classList.remove('open');
-  document.getElementById('cart-overlay-bg').classList.remove('open');
-  unlockBodyScroll();
+// todos los números del pedido en un solo lugar (pantalla, barra y WhatsApp usan lo mismo)
+function calcPedido() {
+  const items = Object.keys(cart)
+    .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
+    .filter(i => i.product);
+  const c = incCfg();
+  let subtotal = 0, comboSavings = 0, baseSinIncentivo = 0, incDesc = 0;
+  items.forEach(it => {
+    const p = it.product, unit = getEffectivePrice(p), base = p.prices[selectedZone.id];
+    it.unit = unit; it.line = unit * it.qty; it.incPct = 0; it.incOff = 0;
+    subtotal += it.line;
+    if (p.categoria === 'Combos de la semana' && base > unit) comboSavings += (base - unit) * it.qty;
+    const ii = c && incentivoIds[p.id] ? incItem(c, p.id) : null;
+    if (ii) {
+      it.incPct = Number(ii.descuento) || 0;
+      const uds = Math.min(it.qty, Math.max(1, Number(c.unidades) || 1));
+      it.incOff = Math.round(unit * it.incPct / 100) * uds;
+      incDesc += it.incOff;
+    } else baseSinIncentivo += it.line;
+  });
+  if (c && Number(c.topeDescuento) > 0 && incDesc > Number(c.topeDescuento)) {
+    // tope de descuento por pedido: se recorta proporcionalmente
+    const k = Number(c.topeDescuento) / incDesc;
+    items.forEach(it => { it.incOff = Math.round(it.incOff * k); });
+    incDesc = items.reduce((s, it) => s + it.incOff, 0);
+  }
+  const neto = subtotal - incDesc;
+  let discountAmount = 0, shippingFree = false;
+  if (activeDiscount?.type === 'percent') discountAmount = Math.round(neto * activeDiscount.value / 100);
+  else if (activeDiscount?.type === 'shipping') shippingFree = true;
+  const freeThreshold = selectedZone.shipping.freeThreshold, shippingCost = selectedZone.shipping.cost;
+  const afterDisc = neto - discountAmount;
+  const shipping = (shippingFree || neto >= freeThreshold || afterDisc >= freeThreshold) ? 0 : shippingCost;
+  return {
+    items, subtotal, comboSavings, displaySubtotal: subtotal + comboSavings, incDesc, neto, discountAmount, shippingFree,
+    shipping, total: afterDisc + shipping, missing: freeThreshold - neto, shippingCost, baseSinIncentivo,
+    unidades: items.reduce((s, i) => s + i.qty, 0)
+  };
+}
+
+let pedidoAbierto = false, scrollProductos = 0;
+function openCart(desdeHistorial) {
+  if (!selectedZone) return;
+  scrollProductos = window.scrollY;
+  pedidoAbierto = true;
+  document.getElementById('products-section').classList.add('hidden');
+  document.getElementById('pedido-section').classList.remove('hidden');
+  document.getElementById('floating-cart')?.classList.add('hidden');
+  document.getElementById('pedido-zona').textContent = `${selectedZone.name} · ${shippingMessage_(selectedZone)}`;
+  renderCartItems();
+  window.scrollTo(0, 0);
+  // el botón "atrás" del celular vuelve a los productos en vez de salir de la página
+  if (!desdeHistorial) { try { history.pushState({ pedido: 1 }, '', '#pedido'); } catch (e) {} }
+}
+function closeCart(desdeHistorial) {
+  if (!pedidoAbierto) return;
+  pedidoAbierto = false;
+  document.getElementById('pedido-section').classList.add('hidden');
+  document.getElementById('products-section').classList.remove('hidden');
+  renderProducts();
   updateCartBtn();
+  window.scrollTo(0, scrollProductos);
+  if (!desdeHistorial && location.hash === '#pedido') { try { history.back(); } catch (e) {} }
+}
+window.addEventListener('popstate', () => {
+  if (pedidoAbierto && location.hash !== '#pedido') closeCart(true);
+  else if (!pedidoAbierto && location.hash === '#pedido' && selectedZone) openCart(true);
+});
+
+function imgMini(product) {
+  return product.image
+    ? `<img src="${product.image}" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode('🍞'))">`
+    : '🍞';
 }
 
 function renderCartItems() {
@@ -755,119 +833,135 @@ function renderCartItems() {
   const summaryEl = document.getElementById('cart-summary');
   const whatsappBtn = document.getElementById('whatsapp-btn');
   const couponSection = document.getElementById('coupon-section');
+  const T = calcPedido();
 
-  const cartItems = Object.keys(cart)
-    .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
-    .filter(item => item.product);
+  document.getElementById('pedido-cant').textContent = T.unidades ? `${T.unidades} ${T.unidades === 1 ? 'producto' : 'productos'}` : '';
 
-  if (cartItems.length === 0) {
+  if (T.items.length === 0) {
+    incentivoIds = {};
     itemsEl.innerHTML = `
       <div class="empty-cart">
         <span class="empty-cart-icon">🛒</span>
-        Tu carrito está vacío
+        Tu pedido está vacío
       </div>`;
     summaryEl.innerHTML = '';
     document.getElementById('payment-section').style.display = 'none';
+    document.getElementById('client-section').style.display = 'none';
     if (couponSection) couponSection.style.display = 'none';
+    document.getElementById('incentivo-card').classList.add('hidden');
     whatsappBtn.disabled = true;
+    actualizarBarra(T);
     return;
   }
 
-  itemsEl.innerHTML = cartItems.map(({ product, qty }) => {
-    const price = getEffectivePrice(product);
-    const isCombo = product.categoria === 'Combos de la semana';
-    const basePrice = product.prices[selectedZone.id];
-    const savings = isCombo && basePrice > price ? (basePrice - price) * qty : 0;
+  itemsEl.innerHTML = T.items.map(it => {
+    const p = it.product;
+    const isCombo = p.categoria === 'Combos de la semana';
+    const basePrice = p.prices[selectedZone.id];
+    const savings = isCombo && basePrice > it.unit ? (basePrice - it.unit) * it.qty : 0;
+    const etiqueta = it.incOff > 0 ? `<span class="pi-tag">Sumado con ${it.incPct}% OFF</span>` : (incentivoIds[p.id] ? '<span class="pi-tag pi-tag--s">Sugerido</span>' : '');
     return `
-      <div class="cart-item">
-        <div class="cart-item-name">${product.name}</div>
-        <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty('${product.id}', -1)">−</button>
-          <span class="qty-display">${qty}</span>
-          <button class="qty-btn" onclick="changeQty('${product.id}', 1)">+</button>
+      <div class="pedido-item">
+        <div class="pi-img">${imgMini(p)}</div>
+        <div class="pi-info">
+          <div class="pi-name">${p.name}</div>
+          <div class="pi-unit">${fmt(it.unit)} c/u ${etiqueta}</div>
+          ${savings > 0 ? `<div class="pi-ahorro">🎉 Ahorrás ${fmt(savings)} vs precio individual</div>` : ''}
         </div>
-        <div class="cart-item-price">${fmt(price * qty)}</div>
-      </div>
-      ${savings > 0 ? `<div class="combo-savings-row">🎉 Ahorrás <strong>${fmt(savings)}</strong> vs precio individual</div>` : ''}`;
+        <div class="cart-item-controls">
+          <button class="qty-btn" onclick="changeQty('${p.id}', -1)" aria-label="Quitar uno">−</button>
+          <span class="qty-display">${it.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${p.id}', 1)" aria-label="Sumar uno">+</button>
+        </div>
+        <div class="pi-total">
+          ${it.incOff > 0 ? `<span class="pi-tachado">${fmt(it.line)}</span>` : ''}
+          <span>${fmt(it.line - it.incOff)}</span>
+        </div>
+      </div>`;
   }).join('');
 
+  renderIncentivos(T);
   updateCouponUI();
-
-  // Subtotal display: usa precio base para combos (para mostrar el descuento)
-  const comboSavings = cartItems.reduce((s, { product, qty }) => {
-    if (product.categoria !== 'Combos de la semana') return s;
-    const base = product.prices[selectedZone.id];
-    const eff = getEffectivePrice(product);
-    return base > eff ? s + (base - eff) * qty : s;
-  }, 0);
-  const displaySubtotal = cartItems.reduce((s, { product, qty }) => {
-    const isCombo = product.categoria === 'Combos de la semana';
-    return s + (isCombo ? product.prices[selectedZone.id] : getEffectivePrice(product)) * qty;
-  }, 0);
-  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
-  const freeThreshold = selectedZone.shipping.freeThreshold;
-  const shippingCost = selectedZone.shipping.cost;
-
-  let discountAmount = 0;
-  let shippingFree = false;
-  if (activeDiscount?.type === 'percent') {
-    discountAmount = Math.round(subtotal * activeDiscount.value / 100);
-  } else if (activeDiscount?.type === 'shipping') {
-    shippingFree = true;
-  }
-
-  const originallyFreeShipping = subtotal >= freeThreshold;
-  const subtotalAfterDiscount = subtotal - discountAmount;
-  const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= freeThreshold) ? 0 : shippingCost;
-  const total = subtotalAfterDiscount + shipping;
-  const missing = freeThreshold - subtotal;
-
-  let noticeHTML = '';
-  if (shippingCost > 0 && shipping > 0 && missing > 0 && !shippingFree) {
-    noticeHTML = `<div class="shipping-notice">
-      Agregá ${fmt(missing)} más para envío gratis
-    </div>`;
-  }
 
   const discountSource = activeDiscount?.source === 'cupon' ? 'cupón' : 'ruleta';
   let discountRowHTML = '';
-  if (activeDiscount?.type === 'percent' && discountAmount > 0) {
-    discountRowHTML = `<div class="summary-row discount">
-      <span>${activeDiscount.value}% OFF (${discountSource})</span>
-      <span>-${fmt(discountAmount)}</span>
-    </div>`;
+  if (activeDiscount?.type === 'percent' && T.discountAmount > 0) {
+    discountRowHTML = `<div class="summary-row discount"><span>${activeDiscount.value}% OFF (${discountSource})</span><span>-${fmt(T.discountAmount)}</span></div>`;
   } else if (activeDiscount?.type === 'shipping') {
-    discountRowHTML = `<div class="summary-row discount">
-      <span>Envio gratis (${discountSource})</span>
-      <span>Gratis</span>
-    </div>`;
+    discountRowHTML = `<div class="summary-row discount"><span>Envío gratis (${discountSource})</span><span>Gratis</span></div>`;
   } else if (activeDiscount?.type === 'product') {
-    discountRowHTML = `<div class="summary-row discount">
-      <span>Premio: ${activeDiscount.label} 🎁</span>
-      <span>Incluido</span>
-    </div>`;
+    discountRowHTML = `<div class="summary-row discount"><span>Premio: ${activeDiscount.label} 🎁</span><span>Incluido</span></div>`;
   }
+  const noticeHTML = (T.shippingCost > 0 && T.shipping > 0 && T.missing > 0 && !T.shippingFree)
+    ? `<div class="shipping-notice">Agregá ${fmt(T.missing)} más para envío gratis</div>` : '';
 
   document.getElementById('payment-section').style.display = 'block';
   document.getElementById('client-section').style.display = paymentMethod ? 'block' : 'none';
   whatsappBtn.disabled = paymentMethod === null;
-
-  const comboDiscountRowHTML = comboSavings > 0 ? `
-    <div class="summary-row discount">
-      <span>💰 Descuento combo semanal</span>
-      <span>-${fmt(comboSavings)}</span>
-    </div>` : '';
+  document.getElementById('pedido-nota').textContent = paymentMethod
+    ? 'Te abrimos WhatsApp con el pedido ya escrito: solo tenés que enviarlo.'
+    : 'Elegí cómo vas a pagar para completar el pedido.';
 
   summaryEl.innerHTML = `
     ${noticeHTML}
-    <div class="summary-row"><span>Subtotal</span><span>${fmt(displaySubtotal)}</span></div>
-    ${comboDiscountRowHTML}
+    <div class="summary-row"><span>Subtotal</span><span>${fmt(T.displaySubtotal)}</span></div>
+    ${T.comboSavings > 0 ? `<div class="summary-row discount"><span>💰 Descuento combo semanal</span><span>-${fmt(T.comboSavings)}</span></div>` : ''}
+    ${T.incDesc > 0 ? `<div class="summary-row discount"><span>🎁 Descuento por sumar productos</span><span>-${fmt(T.incDesc)}</span></div>` : ''}
     ${discountRowHTML}
-    <div class="summary-row">
-      <span>Envio</span>
-      <span>${shipping === 0 ? 'Gratis' : fmt(shipping)}</span>
-    </div>
-    <div class="summary-row total"><span>Total</span><span>${fmt(total)}</span></div>`;
+    <div class="summary-row"><span>Envío</span><span>${T.shipping === 0 ? 'Gratis' : fmt(T.shipping)}</span></div>
+    <div class="summary-row total"><span>Total</span><span>${fmt(T.total)}</span></div>`;
+  actualizarBarra(T);
+}
+
+function actualizarBarra(T) {
+  const tot = document.getElementById('pb-total'), btn = document.getElementById('pb-btn');
+  if (!tot || !btn) return;
+  tot.textContent = fmt(T.items.length ? T.total : 0);
+  btn.disabled = !T.items.length;
+  btn.textContent = !T.items.length ? 'Pedido vacío' : paymentMethod ? 'Enviar por WhatsApp' : 'Elegí cómo pagar';
+  btn.classList.toggle('pb-btn--wa', !!paymentMethod);
+}
+function pedidoBarraAccion() {
+  if (paymentMethod) { sendWhatsApp(); return; }
+  document.getElementById('payment-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// tarjetas "¿Le sumás algo más?"
+function renderIncentivos(T) {
+  const card = document.getElementById('incentivo-card');
+  const c = incCfg();
+  if (!c) { card.classList.add('hidden'); return; }
+  // se ofrece según lo que el cliente eligió solo (sin contar lo sumado desde acá)
+  const elegible = (!(Number(c.topeTicket) > 0) || T.baseSinIncentivo <= Number(c.topeTicket)) && T.baseSinIncentivo >= (Number(c.minTicket) || 0);
+  const sumados = (c.productos || []).filter(it => incentivoIds[it.id] && cart[it.id]);
+  let ofertas = elegible ? (c.productos || []).filter(it => !cart[it.id]) : [];
+  ofertas = ofertas.map(it => ({ it, p: data.products.find(p => p.id === it.id) })).filter(o => productoDisponible(o.p));
+  const max = Math.max(1, Number(c.maxSugeridos) || 3);
+  ofertas = ofertas.slice(0, Math.max(0, max - sumados.length));
+  if (!ofertas.length) { card.classList.add('hidden'); return; }
+  const hayDesc = ofertas.some(o => Number(o.it.descuento) > 0);
+  document.getElementById('incentivo-titulo').textContent = c.titulo || '¿Le sumás algo más?';
+  document.getElementById('incentivo-sub').textContent = c.subtitulo || (hayDesc ? 'Precio especial solo para sumar a este pedido.' : 'Otros clientes también lo llevan.');
+  const uds = Math.max(1, Number(c.unidades) || 1);
+  document.getElementById('incentivo-lista').innerHTML = ofertas.map(({ it, p }) => {
+    const unit = getEffectivePrice(p), d = Number(it.descuento) || 0, conDesc = unit - Math.round(unit * d / 100);
+    return `
+      <div class="inc-card">
+        ${d > 0 ? `<span class="inc-off">-${d}%</span>` : ''}
+        <div class="inc-img">${imgMini(p)}</div>
+        <div class="inc-name">${p.name}</div>
+        <div class="inc-precio">${d > 0 ? `<span class="inc-tachado">${fmt(unit)}</span>` : ''}<b>${fmt(conDesc)}</b></div>
+        ${d > 0 && uds > 1 ? `<div class="inc-uds">hasta ${uds} unidades</div>` : ''}
+        <button class="inc-btn" onclick="sumarIncentivo('${p.id}')">+ Sumar</button>
+      </div>`;
+  }).join('');
+  card.classList.remove('hidden');
+}
+function sumarIncentivo(id) {
+  incentivoIds[id] = true;
+  cart[id] = (cart[id] || 0) + 1;
+  updateCartBtn();
+  renderCartItems();
 }
 
 // La verificación de precios vigentes pasa antes, al elegir la zona (ver
@@ -875,38 +969,12 @@ function renderCartItems() {
 // datos ya confirmados y acá, al confirmar el pedido, no hay que esperar
 // ningún fetch de más (eso se sentía trabado justo en el peor momento).
 function sendWhatsApp() {
-  const cartItems = Object.keys(cart)
-    .map(id => ({ product: data.products.find(p => p.id === id), qty: cart[id] }))
-    .filter(item => item.product);
-
-  const subtotal = cartItems.reduce((s, { product, qty }) => s + getEffectivePrice(product) * qty, 0);
-  const waComboSavings = cartItems.reduce((s, { product, qty }) => {
-    if (product.categoria !== 'Combos de la semana') return s;
-    const base = product.prices[selectedZone.id];
-    const eff = getEffectivePrice(product);
-    return base > eff ? s + (base - eff) * qty : s;
-  }, 0);
-  const waDisplaySubtotal = subtotal + waComboSavings;
-
-  let discountAmount = 0;
-  let shippingFree = false;
-  if (activeDiscount?.type === 'percent') {
-    discountAmount = Math.round(subtotal * activeDiscount.value / 100);
-  } else if (activeDiscount?.type === 'shipping') {
-    shippingFree = true;
-  }
-  const originallyFreeShipping = subtotal >= selectedZone.shipping.freeThreshold;
-  const subtotalAfterDiscount = subtotal - discountAmount;
-  const shipping = (shippingFree || originallyFreeShipping || subtotalAfterDiscount >= selectedZone.shipping.freeThreshold) ? 0 : selectedZone.shipping.cost;
-  const total = subtotalAfterDiscount + shipping;
-
-  const lines = cartItems.map(({ product, qty }) => {
-    const price = getEffectivePrice(product);
-    return `• [${qty}x] ${product.name}   ${fmt(price * qty)}`;
-  }).join('\n');
-
+  const T = calcPedido();
+  if (!T.items.length || !paymentMethod) return;
+  const lines = T.items.map(it =>
+    `• [${it.qty}x] ${it.product.name}   ${fmt(it.line - it.incOff)}${it.incOff > 0 ? ` _(sumado con ${it.incPct}% OFF)_` : ''}`
+  ).join('\n');
   const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
-
   const parts = [
     `*Hola! Quiero hacer un pedido de TUPAN Precocido:*`,
     ``,
@@ -914,40 +982,26 @@ function sendWhatsApp() {
     lines,
     ``,
     `*Resumen:*`,
-    `Subtotal: ${fmt(waDisplaySubtotal)}`,
-    ...(waComboSavings > 0 ? [`💰 Descuento combo semanal: -${fmt(waComboSavings)}`] : []),
-    ...(activeDiscount?.type === 'percent' && discountAmount > 0
-      ? [`${activeDiscount.value}% OFF: -${fmt(discountAmount)}`]
-      : []),
-    ...(activeDiscount?.type === 'shipping'
-      ? [`Descuento: Envio gratis`]
-      : []),
-    ...(activeDiscount?.type === 'product'
-      ? [`Premio: ${activeDiscount.label}`]
-      : []),
-    `Envio: ${shipping === 0 ? 'Gratis' : fmt(shipping)}`,
-    `*Total: ${fmt(total)}*`,
+    `Subtotal: ${fmt(T.displaySubtotal)}`,
+    ...(T.comboSavings > 0 ? [`💰 Descuento combo semanal: -${fmt(T.comboSavings)}`] : []),
+    ...(T.incDesc > 0 ? [`🎁 Descuento por sumar productos: -${fmt(T.incDesc)}`] : []),
+    ...(activeDiscount?.type === 'percent' && T.discountAmount > 0 ? [`${activeDiscount.value}% OFF: -${fmt(T.discountAmount)}`] : []),
+    ...(activeDiscount?.type === 'shipping' ? [`Descuento: Envio gratis`] : []),
+    ...(activeDiscount?.type === 'product' ? [`Premio: ${activeDiscount.label}`] : []),
+    `Envio: ${T.shipping === 0 ? 'Gratis' : fmt(T.shipping)}`,
+    `*Total: ${fmt(T.total)}*`,
     ``,
     `Pago: ${pagoLabel}`,
     `Zona: ${selectedZone.name}`,
   ];
-
   if (clientType === 'nuevo') {
-    const nombre      = document.getElementById('field-nombre').value.trim();
-    const apellido    = document.getElementById('field-apellido').value.trim();
-    const direccion   = document.getElementById('field-direccion').value.trim();
-    const barrio      = document.getElementById('field-barrio').value.trim();
-    const entrecalles = document.getElementById('field-entrecalles').value.trim();
-    parts.push(
-      ``,
-      `*Datos del cliente:*`,
-      `Nombre: ${nombre} ${apellido}`,
-      `Direccion: ${direccion}`,
-      `Barrio/Lote: ${barrio}`,
-      `Entre calles: ${entrecalles}`
-    );
+    const v = id => document.getElementById(id).value.trim();
+    parts.push(``, `*Datos del cliente:*`,
+      `Nombre: ${v('field-nombre')} ${v('field-apellido')}`,
+      `Direccion: ${v('field-direccion')}`,
+      `Barrio/Lote: ${v('field-barrio')}`,
+      `Entre calles: ${v('field-entrecalles')}`);
   }
-
   window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`, '_blank');
 }
 
@@ -978,8 +1032,7 @@ function selectPayment(method) {
   } else {
     details.classList.add('hidden');
   }
-  document.getElementById('client-section').style.display = 'block';
-  document.getElementById('whatsapp-btn').disabled = false;
+  renderCartItems();
   setTimeout(() => {
     document.getElementById('client-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 80);
@@ -1270,9 +1323,8 @@ function bindEvents() {
     document.getElementById('zone-overlay').classList.add('hidden');
   });
   document.getElementById('back-to-landing-btn').addEventListener('click', goToLanding);
-  document.getElementById('cart-btn').addEventListener('click', openCart);
-  document.getElementById('close-cart-btn').addEventListener('click', closeCart);
-  document.getElementById('cart-overlay-bg').addEventListener('click', closeCart);
+  document.getElementById('cart-btn').addEventListener('click', () => openCart());
+  document.getElementById('close-cart-btn').addEventListener('click', () => closeCart());
   document.getElementById('whatsapp-btn').addEventListener('click', sendWhatsApp);
   document.getElementById('wheel-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeWheelModal();
