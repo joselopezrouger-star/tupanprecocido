@@ -861,7 +861,7 @@ function renderCartItems() {
     const isCombo = p.categoria === 'Combos de la semana';
     const basePrice = p.prices[selectedZone.id];
     const savings = isCombo && basePrice > it.unit ? (basePrice - it.unit) * it.qty : 0;
-    const etiqueta = it.incOff > 0 ? `<span class="pi-tag">Sumado con ${it.incPct}% OFF</span>` : (incentivoIds[p.id] ? '<span class="pi-tag pi-tag--s">Sugerido</span>' : '');
+    const etiqueta = it.incOff > 0 ? `<span class="pi-tag">${it.incPct}% OFF</span>` : (incentivoIds[p.id] ? '<span class="pi-tag pi-tag--s">Sugerido</span>' : '');
     return `
       <div class="pedido-item">
         <div class="pi-img">${imgMini(p)}</div>

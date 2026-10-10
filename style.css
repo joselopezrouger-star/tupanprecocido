@@ -1796,3 +1796,18 @@ main {
   .inc-btn { grid-area: btn; margin-top: 0; padding: 10px 14px; white-space: nowrap; }
   .inc-off { top: 4px; left: 4px; font-size: 10.5px; padding: 2px 6px; }
 }
+
+/* ítems del pedido en el celular: cantidad al costado, entre el nombre y el precio */
+@media (max-width: 859px) {
+  .pedido-card { padding: 16px 14px; }
+  .pedido-item { grid-template-columns: 48px minmax(0, 1fr) auto auto; grid-template-areas: "img info ctrl total"; column-gap: 10px; }
+  .pi-img { width: 48px; height: 48px; border-radius: 9px; font-size: 22px; }
+  .pi-name { font-size: 13.5px; }
+  .pi-unit { font-size: 11.5px; }
+  .pi-tag { font-size: 9.5px; padding: 1px 6px; }
+  .pedido-item .cart-item-controls { gap: 4px; }
+  .pedido-item .qty-btn { width: 28px; height: 28px; font-size: 15px; }
+  .pedido-item .qty-display { min-width: 16px; font-size: 14px; }
+  .pi-total { font-size: 14px; min-width: 58px; }
+  .pi-tachado { font-size: 11px; }
+}
