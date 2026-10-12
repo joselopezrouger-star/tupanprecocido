@@ -1747,6 +1747,7 @@ main {
 .inc-off { position: absolute; top: 8px; left: 8px; z-index: 1; background: linear-gradient(135deg, #43A047, #2E7D32); color: white; font-size: 12px; font-weight: 900; padding: 3px 8px; border-radius: 20px; box-shadow: 0 2px 6px rgba(46,125,50,.35); }
 .inc-img { aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: linear-gradient(135deg, var(--primary-light), #EDD5A3); display: flex; align-items: center; justify-content: center; font-size: 34px; }
 .inc-img img { width: 100%; height: 100%; object-fit: cover; }
+.inc-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .inc-name { font-size: 13px; font-weight: 700; line-height: 1.25; min-height: 32px; }
 .inc-precio { display: flex; align-items: baseline; gap: 6px; font-size: 16px; color: var(--primary-dark); }
 .inc-tachado { font-size: 12px; color: var(--text-light); text-decoration: line-through; }
@@ -1788,11 +1789,12 @@ main {
 /* sugerencias en el celular: filas compactas, todas a la vista y con su "Sumar" sin deslizar */
 @media (max-width: 859px) {
   .incentivo-lista { grid-auto-flow: row; grid-template-columns: 1fr; grid-auto-columns: auto; overflow: visible; gap: 10px; padding: 12px 0 0; scroll-snap-type: none; }
-  .inc-card { display: grid; grid-template-columns: 64px 1fr auto; grid-template-areas: "img name btn" "img precio btn" "img uds btn"; column-gap: 12px; row-gap: 2px; align-items: center; padding: 8px 10px 8px 8px; }
+  .inc-card { display: grid; grid-template-columns: 64px 1fr auto; grid-template-areas: "img info btn"; column-gap: 12px; align-items: center; padding: 8px 10px 8px 8px; }
+  .inc-info { grid-area: info; gap: 2px; justify-content: center; }
   .inc-img { grid-area: img; width: 64px; height: 64px; aspect-ratio: auto; font-size: 26px; }
-  .inc-name { grid-area: name; min-height: 0; font-size: 14px; align-self: end; }
-  .inc-precio { grid-area: precio; font-size: 15px; }
-  .inc-uds { grid-area: uds; margin-top: 0; }
+  .inc-name { min-height: 0; font-size: 14px; }
+  .inc-precio { font-size: 15px; }
+  .inc-uds { margin-top: 0; }
   .inc-btn { grid-area: btn; margin-top: 0; padding: 10px 14px; white-space: nowrap; }
   .inc-off { top: 4px; left: 4px; font-size: 10.5px; padding: 2px 6px; }
 }

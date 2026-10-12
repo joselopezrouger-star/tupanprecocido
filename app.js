@@ -951,9 +951,11 @@ function renderIncentivos(T) {
       <div class="inc-card">
         ${d > 0 ? `<span class="inc-off">-${d}%</span>` : ''}
         <div class="inc-img">${imgMini(p)}</div>
-        <div class="inc-name">${p.name}</div>
-        <div class="inc-precio">${d > 0 ? `<span class="inc-tachado">${fmt(unit)}</span>` : ''}<b>${fmt(conDesc)}</b></div>
-        ${d > 0 && uds > 1 ? `<div class="inc-uds">hasta ${uds} unidades</div>` : ''}
+        <div class="inc-info">
+          <div class="inc-name">${p.name}</div>
+          <div class="inc-precio">${d > 0 ? `<span class="inc-tachado">${fmt(unit)}</span>` : ''}<b>${fmt(conDesc)}</b></div>
+          ${d > 0 && uds > 1 ? `<div class="inc-uds">hasta ${uds} unidades</div>` : ''}
+        </div>
         <button class="inc-btn" onclick="sumarIncentivo('${p.id}')">+ Sumar</button>
       </div>`;
   }).join('');
@@ -974,7 +976,7 @@ function sendWhatsApp() {
   const T = calcPedido();
   if (!T.items.length || !paymentMethod) return;
   const lines = T.items.map(it =>
-    `• [${it.qty}x] ${it.product.name}   ${fmt(it.line - it.incOff)}${it.incOff > 0 ? ` _(sumado con ${it.incPct}% OFF)_` : ''}`
+    `• [${it.qty}x] ${it.product.name}   ${fmt(it.line - it.incOff)}${incentivoIds[it.product.id] ? (it.incOff > 0 ? ` (sugerido con ${it.incPct}% OFF)` : ' (sugerido)') : ''}`
   ).join('\n');
   const pagoLabel = paymentMethod === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo';
   const parts = [
