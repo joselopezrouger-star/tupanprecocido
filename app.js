@@ -1046,7 +1046,8 @@ function sendWhatsApp() {
   // cargarlo. Si el guardado falla, el mensaje sale igual (y en el tablero
   // se puede pegar el mensaje entero).
   const codigo = guardarPedidoTienda_(T, pagoLabel, v);
-  if (codigo) parts.push(``, `Código de pedido: ${codigo}`);
+  // sin guion en el mensaje: con doble click WhatsApp selecciona el código entero
+  if (codigo) parts.push(``, `Código de pedido: ${codigo.replace('-', '')}`);
   window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`, '_blank');
 }
 
