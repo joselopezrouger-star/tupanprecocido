@@ -972,6 +972,41 @@ function sumarIncentivo(id) {
 // selectZone/dataFreshFromServer) — así el pedido se arma siempre sobre
 // datos ya confirmados y acá, al confirmar el pedido, no hay que esperar
 // ningún fetch de más (eso se sentía trabado justo en el peor momento).
+function codigoPedido_() {
+  const abc = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const r = new Uint32Array(5);
+  (window.crypto || window.msCrypto).getRandomValues(r);
+  return 'TP-' + Array.from(r, n => abc[n % abc.length]).join('');
+}
+// se manda con keepalive: el cliente se va a WhatsApp enseguida y el
+// guardado tiene que terminar igual aunque la página quede en segundo plano
+function guardarPedidoTienda_(T, pagoLabel, v) {
+  try {
+    const codigo = codigoPedido_();
+    const datos = {
+      zona_id: selectedZone.id, zona: selectedZone.name, pago: pagoLabel,
+      items: T.items.map(it => ({
+        id: it.product.id, name: it.product.name, qty: it.qty, unit: it.unit, line: it.line,
+        inc_off: it.incOff || 0, sugerido: !!incentivoIds[it.product.id],
+        ...(it.product.categoria === 'Combos de la semana' ? { combo: String(it.product.description || '').split('\n').map(x => x.trim()).filter(Boolean) } : {})
+      })),
+      subtotal: T.displaySubtotal, desc_combo: T.comboSavings, desc_incentivo: T.incDesc,
+      desc_cupon: T.discountAmount, cupon: activeDiscount ? (activeDiscount.label || '') : '',
+      envio_gratis_cupon: activeDiscount?.type === 'shipping',
+      premio: activeDiscount?.type === 'product' ? { label: activeDiscount.label, product_id: activeDiscount.productId || '' } : null,
+      envio: T.shipping, total: T.total,
+      cliente: clientType === 'nuevo'
+        ? { tipo: 'nuevo', nombre: (v('field-nombre') + ' ' + v('field-apellido')).trim(), direccion: v('field-direccion'), barrio: v('field-barrio'), entrecalles: v('field-entrecalles') }
+        : { tipo: 'habitual' }
+    };
+    fetch(`${SUPABASE_URL}/rest/v1/pedidos_tienda`, {
+      method: 'POST', keepalive: true,
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ codigo, datos })
+    }).catch(() => {});
+    return codigo;
+  } catch (e) { return ''; }
+}
 function sendWhatsApp() {
   const T = calcPedido();
   if (!T.items.length || !paymentMethod) return;
@@ -998,14 +1033,20 @@ function sendWhatsApp() {
     `Pago: ${pagoLabel}`,
     `Zona: ${selectedZone.name}`,
   ];
+  const v = id => (document.getElementById(id)?.value || '').trim();
   if (clientType === 'nuevo') {
-    const v = id => document.getElementById(id).value.trim();
     parts.push(``, `*Datos del cliente:*`,
       `Nombre: ${v('field-nombre')} ${v('field-apellido')}`,
       `Direccion: ${v('field-direccion')}`,
       `Barrio/Lote: ${v('field-barrio')}`,
       `Entre calles: ${v('field-entrecalles')}`);
   }
+  // código de pedido: el pedido queda guardado tal cual en Supabase
+  // (pedidos_tienda) y en el tablero alcanza con pegar el código para
+  // cargarlo. Si el guardado falla, el mensaje sale igual (y en el tablero
+  // se puede pegar el mensaje entero).
+  const codigo = guardarPedidoTienda_(T, pagoLabel, v);
+  if (codigo) parts.push(``, `Código de pedido: ${codigo}`);
   window.open(`https://wa.me/${data.business.whatsapp}?text=${encodeURIComponent(parts.join('\n'))}`, '_blank');
 }
 
